@@ -16,11 +16,11 @@ if (typeof window !== "undefined") {
   import("canvas-confetti").then((m) => { confetti = m.default; });
 }
 
-const ACCENT  = "#00E5FF";
-const GOLD    = "#C9A84C";
-const SUCCESS = "#00E676";
-const DANGER  = "#FF3D57";
-const WARNING = "#FFB300";
+const ACCENT  = "#6366F1";
+const GOLD    = "#F59E0B";
+const SUCCESS = "#10B981";
+const DANGER  = "#EF4444";
+const WARNING = "#F59E0B";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type Task = {
@@ -37,7 +37,7 @@ const schema = z.object({
 const PRIORITY: Record<string, { label: string; color: string; indicator: string; bg: string }> = {
   HIGH:   { label: "HAUTE",   color: DANGER,  indicator: DANGER,  bg: `${DANGER}15`  },
   MEDIUM: { label: "MOY.",    color: WARNING, indicator: WARNING, bg: `${WARNING}15` },
-  LOW:    { label: "BASSE",   color: "rgba(240,238,232,0.3)", indicator: "rgba(240,238,232,0.12)", bg: "rgba(255,255,255,0.04)" },
+  LOW:    { label: "BASSE",   color: "rgba(248,248,255,0.3)", indicator: "rgba(248,248,255,0.12)", bg: "rgba(255,255,255,0.04)" },
 };
 
 function SegControl({ value, onChange, tabs }: { value: string; onChange: (v: string) => void; tabs: { key: string; label: string }[] }) {
@@ -49,9 +49,9 @@ function SegControl({ value, onChange, tabs }: { value: string; onChange: (v: st
           <button key={t.key} onClick={() => onChange(t.key)} style={{
             flex: 1, padding: "10px 4px", borderRadius: 10, fontSize: 11,
             fontWeight: 700, letterSpacing: "0.08em", border: "none", cursor: "pointer",
-            fontFamily: "var(--font-sans)", minHeight: 40,
+            fontFamily: "var(--font-space)", minHeight: 40,
             background: active ? ACCENT : "transparent",
-            color: active ? "#050508" : "rgba(240,238,232,0.3)",
+            color: active ? "#050508" : "rgba(248,248,255,0.3)",
             boxShadow: active ? `0 0 12px ${ACCENT}40` : "none",
             transition: "all 0.22s cubic-bezier(0.32,0.72,0,1)",
           }}>{t.label}</button>
@@ -84,7 +84,7 @@ function ProgressCircle({ done, total }: { done: number; total: number }) {
         />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: strokeColor, lineHeight: 1 }}>
+        <span style={{ fontFamily: "var(--font-space)", fontSize: 12, fontWeight: 700, color: strokeColor, lineHeight: 1 }}>
           {done}/{total}
         </span>
       </div>
@@ -163,7 +163,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              style={{ fontFamily: "var(--font-display)", fontSize: 40, color: GOLD, letterSpacing: "0.05em", textShadow: `0 0 40px ${GOLD}` }}
+              style={{ fontFamily: "var(--font-syne)", fontSize: 40, color: GOLD, letterSpacing: "0.05em", textShadow: `0 0 40px ${GOLD}` }}
             >
               TOUT ACCOMPLI
             </motion.p>
@@ -175,8 +175,8 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>TÂCHES</h1>
-            <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6, fontFamily: "var(--font-mono)" }}>
+            <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>TÂCHES</h1>
+            <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6, fontFamily: "var(--font-space)" }}>
               {format(new Date(), "d MMMM yyyy", { locale: fr }).toUpperCase()}
             </p>
           </div>
@@ -213,8 +213,8 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
               animate={{ opacity: 1, scale: 1 }}
               style={{ background: `${SUCCESS}12`, border: `1px solid ${SUCCESS}30`, borderRadius: 20, padding: 20, textAlign: "center" }}
             >
-              <p style={{ fontFamily: "var(--font-display)", fontSize: 24, letterSpacing: "0.05em", color: SUCCESS }}>TOUT ACCOMPLI 🎉</p>
-              <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 4 }}>Excellent travail, Baptiste !</p>
+              <p style={{ fontFamily: "var(--font-syne)", fontSize: 24, letterSpacing: "0.05em", color: SUCCESS }}>TOUT ACCOMPLI 🎉</p>
+              <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 4 }}>Excellent travail, Baptiste !</p>
             </motion.div>
           )}
 
@@ -241,7 +241,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
           {/* Completed section */}
           {doneTasks.length > 0 && (
             <div>
-              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(240,238,232,0.2)", margin: "12px 0 8px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(248,248,255,0.2)", margin: "12px 0 8px" }}>
                 COMPLÉTÉES · {doneTasks.length}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -265,8 +265,8 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
 
           {tasks.length === 0 && (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <CheckCircle2 size={36} style={{ color: "rgba(240,238,232,0.12)", display: "block", margin: "0 auto 12px" }} />
-              <p style={{ color: "rgba(240,238,232,0.25)", fontSize: 14 }}>Aucune tâche ici</p>
+              <CheckCircle2 size={36} style={{ color: "rgba(248,248,255,0.12)", display: "block", margin: "0 auto 12px" }} />
+              <p style={{ color: "rgba(248,248,255,0.25)", fontSize: 14 }}>Aucune tâche ici</p>
             </div>
           )}
         </motion.div>
@@ -280,10 +280,10 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
         style={{
           display: "flex", alignItems: "center", gap: 8,
           marginTop: 20,
-          background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`,
+          background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`,
           color: "#050508", borderRadius: 14, height: 52,
           width: "100%", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em",
-          border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
+          border: "none", cursor: "pointer", fontFamily: "var(--font-space)",
           justifyContent: "center",
           boxShadow: `0 4px 24px ${ACCENT}25`,
         }}
@@ -297,21 +297,21 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
           <>
             <motion.div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAddOpen(false)} />
             <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${ACCENT}12`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
-              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(240,238,232,0.15)", margin: "12px auto 0" }} />
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(248,248,255,0.15)", margin: "12px auto 0" }} />
               <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE TÂCHE</span>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setAddOpen(false)} style={{ color: "rgba(240,238,232,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
+                <span style={{ fontFamily: "var(--font-syne)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE TÂCHE</span>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setAddOpen(false)} style={{ color: "rgba(248,248,255,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
               </div>
               <form onSubmit={handleSubmit(onSubmit)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 14 }}>
                 <div style={{ borderBottom: `1px solid ${ACCENT}35`, paddingBottom: 8 }}>
-                  <input {...register("title")} autoFocus placeholder="Titre de la tâche…" style={{ background: "none", border: "none", outline: "none", color: "var(--text-primary)", fontSize: 16, width: "100%", fontFamily: "var(--font-sans)" }} />
+                  <input {...register("title")} autoFocus placeholder="Titre de la tâche…" style={{ background: "none", border: "none", outline: "none", color: "var(--text-primary)", fontSize: 16, width: "100%", fontFamily: "var(--font-space)" }} />
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["DAY", "WEEK"] as const).map((s) => (
                     <motion.button key={s} type="button" whileTap={{ scale: 0.95 }} onClick={() => setValue("scope", s)} style={{
                       flex: 1, padding: "9px 4px", borderRadius: 10, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
-                      border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer", fontFamily: "var(--font-sans)", minHeight: 40,
-                      background: "var(--surface-3)", color: "rgba(240,238,232,0.5)",
+                      border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer", fontFamily: "var(--font-space)", minHeight: 40,
+                      background: "var(--surface-3)", color: "rgba(248,248,255,0.5)",
                     }}>
                       {s === "DAY" ? "AUJOURD'HUI" : "SEMAINE"}
                     </motion.button>
@@ -325,7 +325,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
                       <motion.button key={p} type="button" whileTap={{ scale: 0.95 }} onClick={() => setValue("priority", p)} style={{
                         flex: 1, padding: "9px 4px", borderRadius: 10, fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
                         background: s.bg, color: s.color, border: `1px solid ${s.indicator}40`,
-                        cursor: "pointer", fontFamily: "var(--font-sans)", minHeight: 40,
+                        cursor: "pointer", fontFamily: "var(--font-space)", minHeight: 40,
                         transition: "all 0.18s cubic-bezier(0.32,0.72,0,1)",
                       }}>
                         {s.label}
@@ -333,7 +333,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
                     );
                   })}
                 </div>
-                <motion.button type="submit" whileTap={{ scale: 0.97 }} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 50, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                <motion.button type="submit" whileTap={{ scale: 0.97 }} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 50, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
                   AJOUTER
                 </motion.button>
               </form>
@@ -389,12 +389,12 @@ function TaskCard({ task, index, onToggle, onDelete, editingId, setEditingId, ed
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => onSaveEdit(task.id)}
             onKeyDown={(e) => { if (e.key === "Enter") onSaveEdit(task.id); if (e.key === "Escape") setEditingId(null); }}
-            style={{ background: "none", border: "none", outline: "none", borderBottom: `1px solid ${ACCENT}`, color: "var(--text-primary)", fontSize: 14, fontFamily: "var(--font-sans)", width: "100%", paddingBottom: 2 }}
+            style={{ background: "none", border: "none", outline: "none", borderBottom: `1px solid ${ACCENT}`, color: "var(--text-primary)", fontSize: 14, fontFamily: "var(--font-space)", width: "100%", paddingBottom: 2 }}
           />
         ) : (
           <p
             onDoubleClick={() => { setEditingId(task.id); setEditValue(task.title); }}
-            style={{ fontSize: 14, fontWeight: 500, color: task.completed ? "rgba(240,238,232,0.3)" : "var(--text-primary)", textDecoration: task.completed ? "line-through" : "none", transition: "all 0.25s", cursor: "text" }}
+            style={{ fontSize: 14, fontWeight: 500, color: task.completed ? "rgba(248,248,255,0.3)" : "var(--text-primary)", textDecoration: task.completed ? "line-through" : "none", transition: "all 0.25s", cursor: "text" }}
           >
             {task.title}
           </p>
@@ -407,7 +407,7 @@ function TaskCard({ task, index, onToggle, onDelete, editingId, setEditingId, ed
       </span>
 
       {/* Delete */}
-      <motion.button whileTap={{ scale: 0.8 }} onClick={onDelete} style={{ color: "rgba(240,238,232,0.18)", flexShrink: 0, background: "none", border: "none", cursor: "pointer", minWidth: 28, minHeight: 28 }}>
+      <motion.button whileTap={{ scale: 0.8 }} onClick={onDelete} style={{ color: "rgba(248,248,255,0.18)", flexShrink: 0, background: "none", border: "none", cursor: "pointer", minWidth: 28, minHeight: 28 }}>
         <Trash2 size={13} />
       </motion.button>
     </motion.div>

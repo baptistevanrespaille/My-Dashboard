@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-06-04T19:41:55.343Z",
+  "mode": "headless",
+  "workerType": "audit",
+  "model": "haiku",
+  "durationMs": 89950,
+  "executionId": "audit_1780602025393_pnafa6",
+  "success": true,
+  "findings": {
+    "vulnerabilities": [
+      {
+        "severity": "critical",
+        "file": "app/profil/page.tsx",
+        "line": 135,
+        "description": "Hardcoded webhook secret 'mydashboard2024' exposed in client-side code. This secret is displayed to all users in the browser and can be easily discovered. The webhook expects this exact value in the x-webhook-secret header, allowing anyone with this code to call the /api/webhook/health endpoint."
+      },
+      {
+        "severity": "high",
+        "file": "app/api/webhook/health/route.ts",
+        "line": 18,
+        "description": "Weak secret-based authentication without additional protective measures. Using a short, hardcoded secret instead of proper API key rotation, rate limiting, or signature verification. No protection against brute-force attacks or replay attacks."
+      },
+      {
+        "severity": "high",
+        "file": "app/api/tasks/route.ts, app/api/body-metrics/route.ts, and other API endpoints",
+        "line": 1,
+        "description": "Missing authentication/authorization on all API endpoints except webhook. GET and POST operations on sensitive health data (weight, sleep, nutrition, tasks, finance) have no access control. Any unauthenticated user can read and modify all application data."
+      },
+      {
+        "severity": "high",
+        "file": "package.json (dependencies)",
+        "line": 0,
+        "description": "Multiple high-severity vulnerabilities in dependencies: Next.js (DoS, XSS, cache poisoning, HTTP smuggling, SSRF), glob (command injection via -c/--cmd), serialize-javascript (RCE via RegExp.flags). These require immediate patching or version updates."
+      },
+      {
+        "severity": "high",
+        "file": "package.json (dependencies)",
+        "line": 0,
+        "description": "glob CLI vulnerability (GHSA-5j98-mcp5-4vw2): Command injection in glob package allows arbitrary shell command execution. Impact: potential remote code execution if glob is used with untrusted input."
+      },
+      {
+        "severity": "high",
+        "file": "package.json (dependencies)",
+        "line": 0,
+        "description": "serialize-javascript RCE vulnerability (GHSA-5c6j-r48x-rmvq): Remote code execution via RegExp.flags and Date.prototype.toISOString(). This is used indirectly through workbox-build/next-pwa."
+      },
+      {
+        "severity": "moderate",
+        "file": "lib/env.ts",
+        "line": 43,
+        "description": "Silent warning suppression in development for invalid environment variables. Errors are caught but only warned about, potentially allowing the app to run with incomplete security configuration in development. Should fail-fast in production."
+      },
+      {
+        "severity": "moderate",
+        "file": "package.json (dependencies)",
+        "line": 0,
+        "description": "PostCSS XSS vulnerability (GHSA-qx2v-qp2m-jg93): Unescaped </style> in CSS stringify output can lead to cross-site scripting. Affects CSS processing pipeline."
+      },
+      {
+        "severity": "moderate",
+        "file": "package.json (dependencies)",
+        "line": 0,
+        "description": "@hono/node-server middleware bypass (GHSA-92pp-h63x-v22m): Repeated slashes in serveStatic can bypass middleware. Example: /api//endpoint might bypass authentication checks."
+      },
+      {
+        "severity": "medium",
+        "file": "app/api/body-metrics/route.ts",
+        "line": 16,
+        "description": "Input validation for 'days' parameter uses Math.min but doesn't validate against negative or non-numeric values before parseInt(). Could accept negative numbers."
+      },
+      {
+        "severity": "low",
+        "file": "app/api/webhook/health/route.ts",
+        "line": 24,
+        "description": "No rate limiting on webhook endpoint. Allows unlimited requests, enabling DoS attacks. An attacker could spam requests and create excessive database records."
+      },
+      {
+        "severity": "low",
+        "file": "app/profil/page.tsx",
+        "line": 39,
+        "description": "Webhook URL construction relies on window.location.origin which could be manipulated in certain contexts. While limited risk, should validate protocol is https:// in production."
+      }
+    ],
+    "riskScore": 72,
+    "recommendations": [
+      "CRITICAL: Replace hardcoded webhook secret with a secure environment variable. Rotate the current secret immediately and regenerate user access.",
+      "CRITICAL: Implement proper authentication/authorization for all API endpoints (tasks, body-metrics, workouts, nutrition, sleep, finance, dashboard). Consider using NextAuth.js or similar.",
+      "HIGH: Run 'npm audit fix --force' to update Next.js, glob, serialize-javascript, and PostCSS to patched versions. Test thoroughly for breaking changes.",
+      "HIGH: Add per-user data isolation - each user should only access their own data. Implement user sessions or API tokens.",
+      "HIGH: Implement rate limiting on all API endpoints, especially webhook to prevent DoS attacks.",
+      "MEDIUM: Add proper API key management with rotation capabilities instead of static secrets.",
+      "MEDIUM: Implement CORS restrictions if this API is only for your own frontend.",
+      "MEDIUM: Add input sanitization and validation for all user inputs, particularly notes/description fields.",
+      "MEDIUM: Implement audit logging for sensitive operations (data modifications, deletions).",
+      "LOW: Change Math.min logic in body-metrics to explicitly validate days parameter is positive: 'const days = Math.max(1, Math.min(parseInt(searchParams.get(\"days\") ?? \"30\"), 365))'",
+      "LOW: Add security headers (Content-Security-Policy, X-Frame-Options, X-Content-Type-Options) in next.config.js",
+      "LOW: Implement request signing for webhook instead of simple secret header (HMAC-SHA256 signature).",
+      "INFRASTRUCTURE: Set up automated dependency scanning and alerts for new CVEs affecting your dependencies."
+    ]
+  },
+  "rawOutputPreview": "Based on my analysis of the codebase, I've identified several security vulnerabilities. Here's the comprehensive JSON report:\n\n```json\n{\n  \"vulnerabilities\": [\n    {\n      \"severity\": \"critical\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 135,\n      \"description\": \"Hardcoded webhook secret 'mydashboard2024' exposed in client-side code. This secret is displayed to all users in the browser and can be easily discovered. The webhook expects this exact value in the x-webhook-secret header, allowing anyone with this code to call the /api/webhook/health endpoint.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/api/webhook/health/route.ts\",\n      \"line\": 18,\n      \"description\": \"Weak secret-based authentication without additional protective measures. Using a short, hardcoded secret instead of proper API key rotation, rate limiting, or signature verification. No protection against brute-force attacks or replay attacks.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/api/tasks/route.ts, app/api/body-metrics/route.ts, and other API endpoints\",\n      \"line\": 1,\n      \"description\": \"Missing authentication/authorization on all API endpoints except webhook. GET and POST operations on sensitive health data (weight, sleep, nutrition, tasks, finance) have no access control. Any unauthenticated user can read and modify all application data.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"package.json (dependencies)\",\n      \"line\": 0,\n      \"description\": \"Multiple high-severity vulnerabilities in dependencies: Next.js (DoS, XSS, cache poisoning, HTTP smuggling, SSRF), glob (command injection via -c/--cmd), serialize-javascript (RCE via RegExp.flags). These require immediate patching or version updates.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"package.json (dependencies)\",\n      \"line\": 0,\n      \"description\": \"glob CLI vulnerability (GHSA-5j98-mcp5-4vw2): Command injection in glob package allows arbitrary shell command execution. Im",
+  "rawOutputLength": 6490
+}

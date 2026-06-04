@@ -1,35 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
-import { Bebas_Neue, JetBrains_Mono, Inter } from "next/font/google";
+import { Syne, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
-import AmbientBackground from "@/components/AmbientBackground";
+import CircuitBackground from "@/components/CircuitBackground";
 import PageTransitionWrapper from "@/components/PageTransitionWrapper";
 import { Toaster } from "sonner";
 
-const inter = Inter({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-syne",
   display: "swap",
 });
 
-const bebasNeue = Bebas_Neue({
-  weight: "400",
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-  weight: ["400", "500", "700"],
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space",
   display: "swap",
 });
 
@@ -55,14 +42,17 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#050508",
+  themeColor: "#030305",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased" style={{ background: "#050508", color: "#F0EEE8" }}>
-        <AmbientBackground />
+    <html lang="fr" className={`${syne.variable} ${spaceGrotesk.variable}`}>
+      <body
+        className="antialiased"
+        style={{ background: "#030305", color: "#F8F8FF", fontFamily: "var(--font-space), system-ui, sans-serif" }}
+      >
+        <CircuitBackground />
         <main className="pb-nav min-h-screen max-w-lg mx-auto relative z-10">
           <PageTransitionWrapper>{children}</PageTransitionWrapper>
         </main>
@@ -72,10 +62,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           position="top-center"
           toastOptions={{
             style: {
-              background: "rgba(18,18,31,0.95)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              color: "#f0f0f0",
-              backdropFilter: "blur(12px)",
+              background: "rgba(13,13,26,0.98)",
+              border: "1px solid rgba(99,102,241,0.2)",
+              color: "#F8F8FF",
+              backdropFilter: "blur(16px)",
+              fontFamily: "var(--font-space)",
             },
           }}
         />

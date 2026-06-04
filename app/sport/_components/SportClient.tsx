@@ -13,10 +13,10 @@ import Card3D from "@/components/Card3D";
 import FlipNumber from "@/components/FlipNumber";
 import { SPRING_STANDARD, gradientDividerStyle } from "@/lib/motion";
 
-const ACCENT  = "#00E5FF";
-const SUCCESS = "#00E676";
-const DANGER  = "#FF3D57";
-const WARNING = "#FFB300";
+const ACCENT  = "#6366F1";
+const SUCCESS = "#10B981";
+const DANGER  = "#EF4444";
+const WARNING = "#F59E0B";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 export type Session = {
@@ -45,11 +45,11 @@ function BarTip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "rgba(12,12,18,0.97)", border: `1px solid ${ACCENT}35`, borderRadius: 10, padding: "8px 12px", backdropFilter: "blur(8px)" }}>
-      <p style={{ fontSize: 10, color: "rgba(240,238,232,0.4)", marginBottom: 4 }}>{label}</p>
+      <p style={{ fontSize: 10, color: "rgba(248,248,255,0.4)", marginBottom: 4 }}>{label}</p>
       {payload.map((p: any) => (
         <div key={p.dataKey} style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <div style={{ width: 6, height: 6, borderRadius: "50%", background: p.fill }} />
-          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-primary)" }}>{p.value}</span>
+          <span style={{ fontSize: 11, fontFamily: "var(--font-space)", color: "var(--text-primary)" }}>{p.value}</span>
         </div>
       ))}
     </div>
@@ -125,8 +125,8 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
 
       {/* HEADER */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SPORT</h1>
-        <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6, fontFamily: "var(--font-mono)" }}>
+        <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SPORT</h1>
+        <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6, fontFamily: "var(--font-space)" }}>
           {format(new Date(), "MMMM yyyy", { locale: fr }).toUpperCase()}
           <span style={{ color: ACCENT, margin: "0 8px" }}>·</span>
           {monthSessions.length} SÉANCES
@@ -145,9 +145,9 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
           { label: "KM", value: `${monthKm.toFixed(1)}`, unit: "km" },
         ].map((s, i) => (
           <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 16, padding: "12px 10px", textAlign: "center" }}>
-            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(240,238,232,0.25)", marginBottom: 4 }}>{s.label}</p>
-            <p style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>
-              <FlipNumber value={s.value} /><span style={{ fontSize: 13, color: "rgba(240,238,232,0.35)", marginLeft: 2 }}>{s.unit}</span>
+            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(248,248,255,0.25)", marginBottom: 4 }}>{s.label}</p>
+            <p style={{ fontFamily: "var(--font-syne)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>
+              <FlipNumber value={s.value} /><span style={{ fontSize: 13, color: "rgba(248,248,255,0.35)", marginLeft: 2 }}>{s.unit}</span>
             </p>
           </div>
         ))}
@@ -160,9 +160,9 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
             <button key={k} onClick={() => setActiveTab(k)} style={{
               flex: 1, padding: "8px 4px", borderRadius: 8, fontSize: 10, fontWeight: 700,
               letterSpacing: "0.08em", border: "none", cursor: "pointer", minHeight: 36,
-              fontFamily: "var(--font-sans)",
+              fontFamily: "var(--font-space)",
               background: activeTab === k ? ACCENT : "transparent",
-              color: activeTab === k ? "#050508" : "rgba(240,238,232,0.3)",
+              color: activeTab === k ? "#050508" : "rgba(248,248,255,0.3)",
               boxShadow: activeTab === k ? `0 0 12px ${ACCENT}40` : "none",
               transition: "all 0.2s cubic-bezier(0.32,0.72,0,1)",
             }}>{l}</button>
@@ -174,8 +174,8 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
               {activeTab === "freq" ? (
                 <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <XAxis dataKey="label" tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip content={<BarTip />} />
                   <Bar dataKey="PUSH" stackId="a" fill="#6495ED" />
                   <Bar dataKey="PULL" stackId="a" fill={SUCCESS} />
@@ -185,16 +185,16 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
               ) : activeTab === "volume" ? (
                 <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="label" tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<BarTip />} />
                   <Bar dataKey="volume" fill={ACCENT} radius={[4, 4, 0, 0]} />
                 </BarChart>
               ) : (
                 <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="label" tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<BarTip />} />
                   <Bar dataKey="km" fill={DANGER} radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -207,7 +207,7 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
             {[["PUSH", "#6495ED"], ["PULL", SUCCESS], ["LEGS", WARNING], ["CARDIO", DANGER]].map(([l, c]) => (
               <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
-                <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(240,238,232,0.35)" }}>{l}</span>
+                <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(248,248,255,0.35)" }}>{l}</span>
               </div>
             ))}
           </div>
@@ -218,13 +218,13 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {Object.keys(grouped).length === 0 ? (
           <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 48, textAlign: "center" }}>
-            <Dumbbell size={36} style={{ color: "rgba(240,238,232,0.15)", display: "block", margin: "0 auto 12px" }} />
-            <p style={{ color: "rgba(240,238,232,0.3)", fontSize: 14 }}>Aucune session. Lance-toi !</p>
+            <Dumbbell size={36} style={{ color: "rgba(248,248,255,0.15)", display: "block", margin: "0 auto 12px" }} />
+            <p style={{ color: "rgba(248,248,255,0.3)", fontSize: 14 }}>Aucune session. Lance-toi !</p>
           </div>
         ) : (
           Object.entries(grouped).map(([week, wSessions], wi) => (
             <motion.div key={week} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + wi * 0.06, duration: 0.4, ease: [0.32, 0.72, 0, 1] }}>
-              <p style={{ fontFamily: "var(--font-display)", fontSize: 18, letterSpacing: "0.08em", color: "rgba(240,238,232,0.25)", marginBottom: 10 }}>{week}</p>
+              <p style={{ fontFamily: "var(--font-syne)", fontSize: 18, letterSpacing: "0.08em", color: "rgba(248,248,255,0.25)", marginBottom: 10 }}>{week}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {wSessions.map((s) => (
                   <SessionCard key={s.id} session={s} expanded={expanded === s.id} onToggle={() => setExpanded(expanded === s.id ? null : s.id)} />
@@ -242,7 +242,7 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
         style={{
           position: "fixed", bottom: 100, right: 20,
           width: 64, height: 64, borderRadius: "50%",
-          background: `radial-gradient(circle at 40% 35%, ${ACCENT}, #00B8CC)`,
+          background: `radial-gradient(circle at 40% 35%, ${ACCENT}, #4F46E5)`,
           border: "none", cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
           boxShadow: `0 8px 32px ${ACCENT}40, 0 0 0 1px ${ACCENT}25`,
@@ -280,13 +280,13 @@ function SessionCard({ session, expanded, onToggle }: { session: Session; expand
               <span style={{ background: color + "22", color, border: `1px solid ${color}40`, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999, letterSpacing: "0.08em" }}>
                 {label.toUpperCase()}
               </span>
-              {volume > 0 && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,238,232,0.35)" }}>{(volume / 1000).toFixed(1)}t</span>}
-              {session.cardioLog?.distanceKm && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,238,232,0.35)" }}>{session.cardioLog.distanceKm} km</span>}
+              {volume > 0 && <span style={{ fontFamily: "var(--font-space)", fontSize: 10, color: "rgba(248,248,255,0.35)" }}>{(volume / 1000).toFixed(1)}t</span>}
+              {session.cardioLog?.distanceKm && <span style={{ fontFamily: "var(--font-space)", fontSize: 10, color: "rgba(248,248,255,0.35)" }}>{session.cardioLog.distanceKm} km</span>}
             </div>
-            <p style={{ fontSize: 11, color: "rgba(240,238,232,0.35)" }}>{dateStr} · {session.duration} min</p>
+            <p style={{ fontSize: 11, color: "rgba(248,248,255,0.35)" }}>{dateStr} · {session.duration} min</p>
           </div>
           <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
-            <ChevronDown size={15} style={{ color: "rgba(240,238,232,0.3)" }} />
+            <ChevronDown size={15} style={{ color: "rgba(248,248,255,0.3)" }} />
           </motion.div>
         </button>
 
@@ -308,11 +308,11 @@ function SessionCard({ session, expanded, onToggle }: { session: Session; expand
                     <div key={ex.id} style={{ background: "var(--surface-3)", borderRadius: 12, padding: 12, marginBottom: 8 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                         <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{ex.exerciseName}</p>
-                        {exVol > 0 && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,238,232,0.3)" }}>{exVol} kg vol.</span>}
+                        {exVol > 0 && <span style={{ fontFamily: "var(--font-space)", fontSize: 10, color: "rgba(248,248,255,0.3)" }}>{exVol} kg vol.</span>}
                       </div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {ex.sets.map((set, i) => (
-                          <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, background: `${ACCENT}12`, color: ACCENT, padding: "4px 8px", borderRadius: 8 }}>
+                          <span key={i} style={{ fontFamily: "var(--font-space)", fontSize: 11, fontWeight: 500, background: `${ACCENT}12`, color: ACCENT, padding: "4px 8px", borderRadius: 8 }}>
                             {set.reps}×{set.weightKg}kg
                           </span>
                         ))}
@@ -333,9 +333,9 @@ function MiniStat({ label, value, icon }: { label: string; value: string; icon?:
   return (
     <div style={{ background: "var(--surface-3)", borderRadius: 10, padding: "8px 10px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
-        {icon}<span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(240,238,232,0.25)", textTransform: "uppercase" }}>{label}</span>
+        {icon}<span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(248,248,255,0.25)", textTransform: "uppercase" }}>{label}</span>
       </div>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{value}</span>
+      <span style={{ fontFamily: "var(--font-space)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{value}</span>
     </div>
   );
 }

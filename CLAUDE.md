@@ -1,3 +1,38 @@
+# MyDashboard — Contexte Projet (mis à jour 2026-06-04)
+
+## État actuel du projet
+Application de life-tracking personnelle **entièrement construite et déployée**.
+
+- **Vercel Production** : https://my-dashboard-v2-one.vercel.app
+- **GitHub** : `baptistevanrespaille/My-Dashboard` (branche `main`)
+- **DB** : Supabase PostgreSQL `vvzwyjikmjvkaxsasbed` (eu-west-3)
+- **Build** : ✅ 0 erreur, 21 routes — `npm run build` passe proprement
+
+## Fonctionnalités complètes
+- Dashboard premium (framer-motion, 6 sections, `/api/dashboard/home`)
+- Sport : PPL (Push/Pull/Legs) + Cardio avec modal auto (`?modal=true`)
+- Santé : Poids (IMC), Calories (donut macros, import Yazio CSV), Sommeil (score)
+- Finance : Portefeuille ETF/actions, snapshots, import BNP CSV, refresh prix yahoo-finance2
+- Tâches : confetti, double-clic édition, filtre priorité, bottom sheet ajout
+- Profil : préférences localStorage, webhook info, reseed
+- PWA : service worker, manifest, icônes 192/512px
+
+## Design system
+- Fond : `#080810` | Cards : `#12121F` | Accent : `#6495ED` (Cornflower Blue)
+- Variables CSS dans `globals.css`, Tailwind dans `tailwind.config.ts`
+- Font Inter, border-radius 20px, transitions 0.2s
+
+## Commandes rapides
+```bash
+npm run dev          # Local dev
+npm run build        # Build prod
+npm run db:seed      # Reseed données
+npm run db:studio    # Prisma Studio
+git push origin main # Déclenche redéploiement Vercel auto
+```
+
+---
+
 # Ruflo — Claude Code Configuration
 
 ## Rules

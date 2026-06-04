@@ -17,11 +17,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import FlipNumber from "@/components/FlipNumber";
 import PulsingGlow from "@/components/PulsingGlow";
 
-const ACCENT  = "#00E5FF";
-const GOLD    = "#C9A84C";
-const SUCCESS = "#00E676";
-const DANGER  = "#FF3D57";
-const WARNING = "#FFB300";
+const ACCENT  = "#6366F1";
+const GOLD    = "#F59E0B";
+const SUCCESS = "#10B981";
+const DANGER  = "#EF4444";
+const WARNING = "#F59E0B";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type SanteData = {
@@ -52,9 +52,9 @@ function SegControl({ value, onChange, tabs }: {
           <button key={t.key} onClick={() => onChange(t.key)} style={{
             flex: 1, padding: "10px 4px", borderRadius: 10, fontSize: 11,
             fontWeight: 700, letterSpacing: "0.08em", border: "none", cursor: "pointer",
-            fontFamily: "var(--font-sans)", minHeight: 40, position: "relative", zIndex: 1,
+            fontFamily: "var(--font-space)", minHeight: 40, position: "relative", zIndex: 1,
             background: active ? ACCENT : "transparent",
-            color: active ? "#050508" : "rgba(240,238,232,0.3)",
+            color: active ? "#050508" : "rgba(248,248,255,0.3)",
             boxShadow: active ? `0 0 12px ${ACCENT}40` : "none",
             transition: "all 0.22s cubic-bezier(0.32,0.72,0,1)",
           }}>
@@ -88,9 +88,9 @@ function Tip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "rgba(12,12,18,0.97)", border: `1px solid ${ACCENT}35`, borderRadius: 10, padding: "8px 12px", backdropFilter: "blur(8px)" }}>
-      <p style={{ fontSize: 10, color: "rgba(240,238,232,0.4)", marginBottom: 4 }}>{label}</p>
+      <p style={{ fontSize: 10, color: "rgba(248,248,255,0.4)", marginBottom: 4 }}>{label}</p>
       {payload.map((p: any) => (
-        <p key={p.dataKey} style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
+        <p key={p.dataKey} style={{ fontFamily: "var(--font-space)", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
           {p.value} {p.name}
         </p>
       ))}
@@ -118,8 +118,8 @@ export default function SanteClient({ data }: { data: SanteData }) {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SANTÉ</h1>
-            <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6 }}>Poids · Calories · Sommeil</p>
+            <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SANTÉ</h1>
+            <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6 }}>Poids · Calories · Sommeil</p>
           </div>
           {/* Score circle SVG */}
           <div style={{ position: "relative", width: 64, height: 64, marginTop: 4 }}>
@@ -137,7 +137,7 @@ export default function SanteClient({ data }: { data: SanteData }) {
               />
             </svg>
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>{globalScore}</span>
+              <span style={{ fontFamily: "var(--font-space)", fontSize: 14, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>{globalScore}</span>
             </div>
           </div>
         </div>
@@ -205,10 +205,10 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       {/* Hero metric */}
       <PulsingGlow intensity="low">
         <div style={{ background: "var(--surface-1)", border: `1px solid ${ACCENT}20`, borderRadius: 20, padding: 24, textAlign: "center" }}>
-          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)", marginBottom: 8 }}>POIDS ACTUEL</p>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 72, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)", marginBottom: 8 }}>POIDS ACTUEL</p>
+          <p style={{ fontFamily: "var(--font-syne)", fontSize: 72, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
             <FlipNumber value={latest ? `${latest}` : "—"} />
-            <span style={{ fontSize: 24, color: "rgba(240,238,232,0.35)", marginLeft: 6 }}>KG</span>
+            <span style={{ fontSize: 24, color: "rgba(248,248,255,0.35)", marginLeft: 6 }}>KG</span>
           </p>
           {bmi != null && bmiCat && (
             <span style={{ display: "inline-block", marginTop: 10, background: bmiCat.c + "20", color: bmiCat.c, border: `1px solid ${bmiCat.c}40`, fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 999 }}>
@@ -221,29 +221,29 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       {/* Stats pills */}
       <div style={{ display: "flex", gap: 8 }}>
         {[["MIN", min], ["MOY", avg], ["MAX", max]].map(([l, v]) => (
-          <div key={l as string} style={{ flex: 1, background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
-            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(240,238,232,0.25)", marginBottom: 4 }}>{l as string}</p>
-            <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{v as number} kg</p>
+          <div key={l as string} style={{ flex: 1, background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
+            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(248,248,255,0.25)", marginBottom: 4 }}>{l as string}</p>
+            <p style={{ fontFamily: "var(--font-space)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{v as number} kg</p>
           </div>
         ))}
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)" }}>ENREGISTRER</p>
         <div style={{ display: "flex", gap: 10 }}>
           <input {...register("date")} type="date" className="input-dark" style={{ flex: 1 }} />
           <input {...register("weight")} type="number" step="0.1" placeholder="75.5" className="input-dark" style={{ flex: 1 }} />
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
           ENREGISTRER
         </motion.button>
       </form>
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20 }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>ÉVOLUTION</p>
+        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20 }}>
+          <p style={{ fontFamily: "var(--font-syne)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>ÉVOLUTION</p>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
               <defs>
@@ -253,7 +253,7 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="date" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 10 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+              <XAxis dataKey="date" tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 10 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
               <Tooltip content={<Tip />} cursor={{ stroke: `${ACCENT}40`, strokeWidth: 1, strokeDasharray: "4 4" }} />
               <Area type="monotone" dataKey="Poids" stroke={ACCENT} strokeWidth={2.5} fill="url(#wg2)" dot={false} activeDot={{ r: 5, fill: "#fff", stroke: ACCENT, strokeWidth: 2 }} />
               <Area type="monotone" dataKey="Tendance" stroke={GOLD} strokeWidth={1.5} strokeDasharray="6 3" fill="none" dot={false} />
@@ -287,7 +287,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Donut */}
       {latest && (
-        <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 24 }}>
+        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
               <ResponsiveContainer width={160} height={160}>
@@ -298,8 +298,8 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>{latest.calories}</span>
-                <span style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", letterSpacing: "0.08em" }}>KCAL</span>
+                <span style={{ fontFamily: "var(--font-syne)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>{latest.calories}</span>
+                <span style={{ fontSize: 10, color: "rgba(248,248,255,0.35)", letterSpacing: "0.08em" }}>KCAL</span>
               </div>
             </div>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -307,7 +307,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
                 <div key={d.name}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                     <span style={{ fontSize: 11, fontWeight: 600, color: d.color }}>{d.name}</span>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-primary)" }}>{d.value}g</span>
+                    <span style={{ fontFamily: "var(--font-space)", fontSize: 11, color: "var(--text-primary)" }}>{d.value}g</span>
                   </div>
                   <BeamProg value={d.value} max={d.value + 10} color={d.color} />
                 </div>
@@ -316,8 +316,8 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
           </div>
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: "rgba(240,238,232,0.35)" }}>Objectif journalier</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: ACCENT, fontWeight: 700 }}>{latest.calories} / {calorieGoal} kcal</span>
+              <span style={{ fontSize: 11, color: "rgba(248,248,255,0.35)" }}>Objectif journalier</span>
+              <span style={{ fontFamily: "var(--font-space)", fontSize: 11, color: ACCENT, fontWeight: 700 }}>{latest.calories} / {calorieGoal} kcal</span>
             </div>
             <BeamProg value={latest.calories} max={calorieGoal} color={latest.calories > calorieGoal * 1.1 ? DANGER : ACCENT} />
           </div>
@@ -325,8 +325,8 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
       )}
 
       {/* Import CSV + Form */}
-      <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
+      <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)" }}>ENREGISTRER</p>
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", gap: 8 }}>
             <input {...register("date")} type="date" className="input-dark" style={{ flex: 1 }} />
@@ -337,7 +337,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
             <input {...register("carbs")} type="number" step="0.1" placeholder="Gluc. g" className="input-dark" />
             <input {...register("fat")} type="number" step="0.1" placeholder="Lip. g" className="input-dark" />
           </div>
-          <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+          <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
             ENREGISTRER
           </motion.button>
         </form>
@@ -379,12 +379,12 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
         <div style={{ background: "var(--surface-1)", border: `1px solid ${scoreColor(latest.duration)}30`, borderRadius: 20, padding: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)", marginBottom: 8 }}>
+              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)", marginBottom: 8 }}>
                 {latest.bedtime && latest.wakeTime ? `${latest.bedtime} → ${latest.wakeTime}` : "DERNIÈRE NUIT"}
               </p>
-              <p style={{ fontFamily: "var(--font-display)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)" }}>
+              <p style={{ fontFamily: "var(--font-syne)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)" }}>
                 <FlipNumber value={latest.duration.toFixed(1)} />
-                <span style={{ fontSize: 20, color: "rgba(240,238,232,0.35)", marginLeft: 6 }}>H</span>
+                <span style={{ fontSize: 20, color: "rgba(248,248,255,0.35)", marginLeft: 6 }}>H</span>
               </p>
             </div>
             {/* Score circle */}
@@ -403,7 +403,7 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
                 />
               </svg>
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: scoreColor(latest.duration) }}>
+                <span style={{ fontFamily: "var(--font-space)", fontSize: 11, fontWeight: 700, color: scoreColor(latest.duration) }}>
                   {Math.round(Math.min(latest.duration / 8, 1) * 100)}
                 </span>
               </div>
@@ -414,13 +414,13 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
 
       {/* 14-day chart */}
       {last14.length > 0 && (
-        <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20 }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>14 DERNIÈRES NUITS</p>
+        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20 }}>
+          <p style={{ fontFamily: "var(--font-syne)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>14 DERNIÈRES NUITS</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={last14} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
               <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="date" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} interval={2} />
-              <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} domain={[0, 10]} />
+              <XAxis dataKey="date" tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} interval={2} />
+              <YAxis tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} domain={[0, 10]} />
               <Tooltip content={<Tip />} />
               <Bar dataKey="Durée" radius={[4, 4, 0, 0]}>
                 {last14.map((d, i) => (
@@ -433,20 +433,20 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)" }}>ENREGISTRER</p>
         <input {...register("date")} type="date" className="input-dark" />
         <div style={{ display: "flex", gap: 8 }}>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", marginBottom: 4 }}>COUCHER</p>
+            <p style={{ fontSize: 10, color: "rgba(248,248,255,0.35)", marginBottom: 4 }}>COUCHER</p>
             <input {...register("bedtime")} type="time" className="input-dark" />
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", marginBottom: 4 }}>RÉVEIL</p>
+            <p style={{ fontSize: 10, color: "rgba(248,248,255,0.35)", marginBottom: 4 }}>RÉVEIL</p>
             <input {...register("wakeTime")} type="time" className="input-dark" />
           </div>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
           ENREGISTRER
         </motion.button>
       </form>

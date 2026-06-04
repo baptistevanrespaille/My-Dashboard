@@ -15,10 +15,10 @@ import Card3D from "@/components/Card3D";
 import PulsingGlow from "@/components/PulsingGlow";
 import FlipNumber from "@/components/FlipNumber";
 
-const ACCENT  = "#00E5FF";
-const GOLD    = "#C9A84C";
-const SUCCESS = "#00E676";
-const DANGER  = "#FF3D57";
+const ACCENT  = "#6366F1";
+const GOLD    = "#F59E0B";
+const SUCCESS = "#10B981";
+const DANGER  = "#EF4444";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type Snapshot = { date: string; bankBalance: number; totalInvested: number; totalValue: number; total: number };
@@ -56,9 +56,9 @@ function FinTip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "rgba(12,12,18,0.97)", border: `1px solid ${ACCENT}35`, borderRadius: 10, padding: "8px 12px", backdropFilter: "blur(8px)" }}>
-      <p style={{ fontSize: 10, color: "rgba(240,238,232,0.4)", marginBottom: 4 }}>{label}</p>
+      <p style={{ fontSize: 10, color: "rgba(248,248,255,0.4)", marginBottom: 4 }}>{label}</p>
       {payload.map((p: any) => (
-        <p key={p.dataKey} style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: p.stroke }}>{fmtEuro(p.value)}</p>
+        <p key={p.dataKey} style={{ fontFamily: "var(--font-space)", fontSize: 13, fontWeight: 700, color: p.stroke }}>{fmtEuro(p.value)}</p>
       ))}
     </div>
   );
@@ -125,8 +125,8 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
 
       {/* HEADER */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>FINANCE</h1>
-        <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6 }}>Patrimoine · Investissements · Suivi</p>
+        <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>FINANCE</h1>
+        <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6 }}>Patrimoine · Investissements · Suivi</p>
         <div style={{ height: 1, marginTop: 16, background: `linear-gradient(90deg, transparent, ${GOLD}33, transparent)` }} />
       </motion.div>
 
@@ -142,21 +142,21 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
             }}>
               <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD, marginBottom: 12 }}>PATRIMOINE TOTAL</p>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+                <span style={{ fontFamily: "var(--font-syne)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
                   <FlipNumber value={total > 0 ? String(Math.floor(total)) : "0"} />
                 </span>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: GOLD, opacity: 0.7, paddingBottom: 4 }}>€</span>
+                <span style={{ fontFamily: "var(--font-syne)", fontSize: 28, color: GOLD, opacity: 0.7, paddingBottom: 4 }}>€</span>
               </div>
 
               {/* Variation 7j */}
               {v7 != null && (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 12px", borderRadius: 999, background: v7 >= 0 ? `${SUCCESS}15` : `${DANGER}15`, border: `1px solid ${v7 >= 0 ? SUCCESS : DANGER}30` }}>
                   {v7 >= 0 ? <TrendingUp size={13} style={{ color: SUCCESS }} /> : <TrendingDown size={13} style={{ color: DANGER }} />}
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: v7 >= 0 ? SUCCESS : DANGER }}>
+                  <span style={{ fontFamily: "var(--font-space)", fontSize: 12, fontWeight: 700, color: v7 >= 0 ? SUCCESS : DANGER }}>
                     {v7 >= 0 ? "+" : ""}{fmtEuro(v7)}
                     {v7pct != null && ` (${v7pct >= 0 ? "+" : ""}${v7pct.toFixed(1)}%)`}
                   </span>
-                  <span style={{ fontSize: 10, color: "rgba(240,238,232,0.35)" }}>7 jours</span>
+                  <span style={{ fontSize: 10, color: "rgba(248,248,255,0.35)" }}>7 jours</span>
                 </div>
               )}
 
@@ -168,9 +168,9 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
                 ].map((s) => (
                   <div key={s.label} style={{ background: "rgba(255,255,255,0.03)", borderRadius: 14, padding: "12px 14px", border: "1px solid rgba(255,255,255,0.05)" }}>
                     <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: s.color, marginBottom: 6 }}>{s.label}</p>
-                    <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{fmtEuro(s.value)}</p>
+                    <p style={{ fontFamily: "var(--font-space)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{fmtEuro(s.value)}</p>
                     {total > 0 && (
-                      <p style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", marginTop: 3 }}>
+                      <p style={{ fontSize: 10, color: "rgba(248,248,255,0.35)", marginTop: 3 }}>
                         {Math.round((s.value / total) * 100)}% du total
                       </p>
                     )}
@@ -180,10 +180,10 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
 
               {/* CTA row */}
               <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-                <motion.button whileTap={{ scale: 0.96 }} onClick={() => setSnapshotModal(true)} className="shimmer-btn" style={{ flex: 1, background: `linear-gradient(135deg, ${GOLD}, #A88930)`, color: "#050508", borderRadius: 12, height: 42, fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                <motion.button whileTap={{ scale: 0.96 }} onClick={() => setSnapshotModal(true)} className="shimmer-btn" style={{ flex: 1, background: `linear-gradient(135deg, ${GOLD}, #A88930)`, color: "#050508", borderRadius: 12, height: 42, fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
                   + SNAPSHOT
                 </motion.button>
-                <motion.button whileTap={{ scale: 0.96 }} onClick={() => bnpRef.current?.click()} style={{ padding: "0 14px", background: "var(--surface-3)", color: "rgba(240,238,232,0.5)", borderRadius: 12, height: 42, border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "var(--font-sans)" }}>
+                <motion.button whileTap={{ scale: 0.96 }} onClick={() => bnpRef.current?.click()} style={{ padding: "0 14px", background: "var(--surface-3)", color: "rgba(248,248,255,0.5)", borderRadius: 12, height: 42, border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "var(--font-space)" }}>
                   <Upload size={13} /> BNP
                 </motion.button>
                 <input ref={bnpRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleBnpImport} />
@@ -195,13 +195,13 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
 
       {/* GRAPHIQUE */}
       {chartData.length > 1 && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 8 }}>ÉVOLUTION</p>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+          <p style={{ fontFamily: "var(--font-syne)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 8 }}>ÉVOLUTION</p>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             {[["Banque", ACCENT], ["Investissements", GOLD]].map(([l, c]) => (
               <div key={l as string} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 12, height: 3, borderRadius: 1, background: c as string }} />
-                <span style={{ fontSize: 10, color: "rgba(240,238,232,0.35)" }}>{l as string}</span>
+                <span style={{ fontSize: 10, color: "rgba(248,248,255,0.35)" }}>{l as string}</span>
               </div>
             ))}
           </div>
@@ -216,7 +216,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="date" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 10 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+              <XAxis dataKey="date" tick={{ fill: "rgba(248,248,255,0.25)", fontSize: 10 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
               <Tooltip content={<FinTip />} cursor={{ stroke: `${ACCENT}40`, strokeWidth: 1, strokeDasharray: "4 4" }} />
               <Area type="monotone" dataKey="Banque" stroke={ACCENT} strokeWidth={2} fill="url(#bankGrad)" dot={false} activeDot={{ r: 4, fill: "#fff", stroke: ACCENT, strokeWidth: 2 }} />
               <Area type="monotone" dataKey="Investissements" stroke={GOLD} strokeWidth={2} strokeDasharray="8 3" fill="url(#invGrad)" dot={false} activeDot={{ r: 4, fill: "#fff", stroke: GOLD, strokeWidth: 2 }} />
@@ -226,16 +226,16 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
       )}
 
       {/* PORTEFEUILLE */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 22, letterSpacing: "0.03em", color: "var(--text-primary)" }}>PORTEFEUILLE</p>
+          <p style={{ fontFamily: "var(--font-syne)", fontSize: 22, letterSpacing: "0.03em", color: "var(--text-primary)" }}>PORTEFEUILLE</p>
           <div style={{ display: "flex", gap: 8 }}>
-            <motion.button whileTap={{ scale: 0.92 }} onClick={handleRefresh} style={{ background: "var(--surface-3)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(240,238,232,0.5)" }}>
+            <motion.button whileTap={{ scale: 0.92 }} onClick={handleRefresh} style={{ background: "var(--surface-3)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(248,248,255,0.5)" }}>
               <motion.div animate={{ rotate: refreshing ? 360 : 0 }} transition={{ duration: 1, repeat: refreshing ? Infinity : 0, ease: "linear" }}>
                 <RefreshCw size={15} />
               </motion.div>
             </motion.button>
-            <motion.button whileTap={{ scale: 0.96 }} onClick={() => setInvModal(true)} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 10, height: 38, padding: "0 14px", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", display: "flex", alignItems: "center", gap: 5 }}>
+            <motion.button whileTap={{ scale: 0.96 }} onClick={() => setInvModal(true)} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 10, height: 38, padding: "0 14px", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", display: "flex", alignItems: "center", gap: 5 }}>
               <Plus size={13} /> AJOUTER
             </motion.button>
           </div>
@@ -245,13 +245,13 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
         {data.investments.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 8, padding: "0 0 8px", borderBottom: "1px solid rgba(255,255,255,0.05)", marginBottom: 4 }}>
             {["TICKER", "PRIX", "PnL", "VALEUR"].map((h) => (
-              <p key={h} style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(240,238,232,0.25)", textAlign: h === "VALEUR" ? "right" : "left" }}>{h}</p>
+              <p key={h} style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(248,248,255,0.25)", textAlign: h === "VALEUR" ? "right" : "left" }}>{h}</p>
             ))}
           </div>
         )}
 
         {data.investments.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "rgba(240,238,232,0.25)", fontSize: 13 }}>
+          <div style={{ textAlign: "center", padding: "32px 0", color: "rgba(248,248,255,0.25)", fontSize: 13 }}>
             Aucune position. Ajoutez vos investissements.
           </div>
         ) : (
@@ -261,7 +261,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
               : null;
             const value = inv.currentPrice * inv.quantity;
             const isPos = pnl != null && pnl >= 0;
-            const pnlColor = pnl == null ? "rgba(240,238,232,0.3)" : isPos ? SUCCESS : DANGER;
+            const pnlColor = pnl == null ? "rgba(248,248,255,0.3)" : isPos ? SUCCESS : DANGER;
 
             return (
               <motion.div
@@ -273,17 +273,17 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
               >
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{inv.ticker}</p>
-                  <p style={{ fontSize: 11, color: "rgba(240,238,232,0.35)", marginTop: 2 }}>{inv.name.length > 16 ? inv.name.slice(0, 16) + "…" : inv.name}</p>
+                  <p style={{ fontSize: 11, color: "rgba(248,248,255,0.35)", marginTop: 2 }}>{inv.name.length > 16 ? inv.name.slice(0, 16) + "…" : inv.name}</p>
                 </div>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text-primary)" }}>
+                <p style={{ fontFamily: "var(--font-space)", fontSize: 13, color: "var(--text-primary)" }}>
                   {inv.currentPrice > 0 ? `${inv.currentPrice.toFixed(2)}€` : "—"}
                 </p>
                 {pnl != null ? (
-                  <span style={{ background: `${pnlColor}18`, color: pnlColor, border: `1px solid ${pnlColor}35`, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-mono)", padding: "3px 7px", borderRadius: 6, display: "inline-block" }}>
+                  <span style={{ background: `${pnlColor}18`, color: pnlColor, border: `1px solid ${pnlColor}35`, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-space)", padding: "3px 7px", borderRadius: 6, display: "inline-block" }}>
                     {isPos ? "+" : ""}{pnl.toFixed(1)}%
                   </span>
-                ) : <span style={{ color: "rgba(240,238,232,0.25)", fontSize: 11 }}>—</span>}
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text-primary)", textAlign: "right" }}>
+                ) : <span style={{ color: "rgba(248,248,255,0.25)", fontSize: 11 }}>—</span>}
+                <p style={{ fontFamily: "var(--font-space)", fontSize: 13, color: "var(--text-primary)", textAlign: "right" }}>
                   {value > 0 ? fmtEuro(value) : "—"}
                 </p>
               </motion.div>
@@ -298,10 +298,10 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
           <>
             <motion.div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setInvModal(false)} />
             <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${ACCENT}15`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
-              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(240,238,232,0.15)", margin: "12px auto 0" }} />
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(248,248,255,0.15)", margin: "12px auto 0" }} />
               <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE POSITION</span>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setInvModal(false)} style={{ color: "rgba(240,238,232,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
+                <span style={{ fontFamily: "var(--font-syne)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE POSITION</span>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setInvModal(false)} style={{ color: "rgba(248,248,255,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
               </div>
               <form onSubmit={submitInv(onAddInvestment)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -317,7 +317,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
                   <input {...regInv("avgBuyPrice")} type="number" step="0.01" placeholder="Prix achat" className="input-dark" />
                   <input {...regInv("currentPrice")} type="number" step="0.01" placeholder="Prix actuel" className="input-dark" />
                 </div>
-                <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 48, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", marginTop: 4 }}>
+                <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 48, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", marginTop: 4 }}>
                   AJOUTER LA POSITION
                 </motion.button>
               </form>
@@ -332,17 +332,17 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
           <>
             <motion.div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSnapshotModal(false)} />
             <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${GOLD}20`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
-              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(240,238,232,0.15)", margin: "12px auto 0" }} />
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(248,248,255,0.15)", margin: "12px auto 0" }} />
               <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVEAU SNAPSHOT</span>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setSnapshotModal(false)} style={{ color: "rgba(240,238,232,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
+                <span style={{ fontFamily: "var(--font-syne)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVEAU SNAPSHOT</span>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setSnapshotModal(false)} style={{ color: "rgba(248,248,255,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
               </div>
               <form onSubmit={submitSnap(onSnapshot)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
                 <input {...regSnap("date")} type="date" className="input-dark" />
                 <input {...regSnap("bankBalance")} type="number" step="0.01" placeholder="Solde banque (€)" className="input-dark" />
                 <input {...regSnap("totalInvested")} type="number" step="0.01" placeholder="Capital investi (€)" className="input-dark" />
                 <input {...regSnap("totalValue")} type="number" step="0.01" placeholder="Valeur actuelle portefeuille (€)" className="input-dark" />
-                <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${GOLD}, #A88930)`, color: "#050508", borderRadius: 12, height: 48, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", marginTop: 4 }}>
+                <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${GOLD}, #A88930)`, color: "#050508", borderRadius: 12, height: 48, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", marginTop: 4 }}>
                   ENREGISTRER
                 </motion.button>
               </form>
