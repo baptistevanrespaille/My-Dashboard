@@ -20,18 +20,15 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: "rgba(3,3,5,0.92)",
+        background: "rgba(0,0,0,0.92)",
         backdropFilter: "blur(30px)",
         WebkitBackdropFilter: "blur(30px)",
-        borderTop: "1px solid rgba(99,102,241,0.15)",
-        boxShadow: "0 -1px 30px rgba(99,102,241,0.06)",
+        borderTop: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "0 -1px 30px rgba(255,255,255,0.03)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div
-        className="flex items-end justify-around max-w-lg mx-auto"
-        style={{ height: 68, paddingBottom: 6 }}
-      >
+      <div className="flex items-end justify-around max-w-lg mx-auto" style={{ height: 68, paddingBottom: 6 }}>
         {tabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
@@ -39,31 +36,20 @@ export default function BottomNav() {
               key={href}
               href={href}
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 4,
-                padding: "8px 12px",
-                minHeight: 44,
-                minWidth: 52,
-                position: "relative",
-                textDecoration: "none",
+                display: "flex", flexDirection: "column", alignItems: "center",
+                gap: 4, padding: "8px 12px", minHeight: 44, minWidth: 52,
+                position: "relative", textDecoration: "none",
               }}
             >
-              {/* Active indicator bar */}
+              {/* White indicator bar */}
               {active && (
                 <motion.div
                   layoutId="nav-bar"
                   style={{
-                    position: "absolute",
-                    top: 0,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: 40,
-                    height: 2,
-                    borderRadius: 999,
-                    background: "#6366F1",
-                    boxShadow: "0 0 10px #6366F1, 0 0 20px rgba(99,102,241,0.4)",
+                    position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+                    width: 40, height: 2, borderRadius: 999,
+                    background: "#FFFFFF",
+                    boxShadow: "0 0 10px rgba(255,255,255,0.6), 0 0 25px rgba(255,255,255,0.2)",
                   }}
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 />
@@ -77,24 +63,18 @@ export default function BottomNav() {
                   size={22}
                   strokeWidth={1.5}
                   style={{
-                    color: active ? "#6366F1" : "rgba(248,248,255,0.28)",
-                    filter: active ? "drop-shadow(0 0 6px rgba(99,102,241,0.8))" : "none",
+                    color: active ? "#FFFFFF" : "rgba(255,255,255,0.28)",
+                    filter: active ? "drop-shadow(0 0 6px rgba(255,255,255,0.8))" : "none",
                     transition: "color 0.2s, filter 0.2s",
                   }}
                 />
               </motion.div>
 
               {active && (
-                <span
-                  style={{
-                    fontFamily: "var(--font-space)",
-                    fontSize: 9,
-                    fontWeight: 700,
-                    letterSpacing: "0.1em",
-                    color: "#6366F1",
-                    lineHeight: 1,
-                  }}
-                >
+                <span style={{
+                  fontFamily: "var(--font-space)", fontSize: 9, fontWeight: 700,
+                  letterSpacing: "0.12em", color: "#FFFFFF", lineHeight: 1,
+                }}>
                   {label}
                 </span>
               )}

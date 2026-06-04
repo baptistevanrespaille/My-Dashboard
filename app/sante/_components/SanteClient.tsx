@@ -17,11 +17,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import FlipNumber from "@/components/FlipNumber";
 import PulsingGlow from "@/components/PulsingGlow";
 
-const ACCENT  = "#6366F1";
-const GOLD    = "#F59E0B";
-const SUCCESS = "#10B981";
-const DANGER  = "#EF4444";
-const WARNING = "#F59E0B";
+const ACCENT  = "#FFFFFF";
+const GOLD    = "#FFFFFF";
+const SUCCESS = "#FFFFFF";
+const DANGER  = "rgba(255,255,255,0.5)";
+const WARNING = "#FFFFFF";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type SanteData = {
@@ -118,7 +118,7 @@ export default function SanteClient({ data }: { data: SanteData }) {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
-            <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SANTÉ</h1>
+            <h1 style={{ fontFamily: "var(--font-orbitron)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SANTÉ</h1>
             <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6 }}>Poids · Calories · Sommeil</p>
           </div>
           {/* Score circle SVG */}
@@ -206,7 +206,7 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       <PulsingGlow intensity="low">
         <div style={{ background: "var(--surface-1)", border: `1px solid ${ACCENT}20`, borderRadius: 20, padding: 24, textAlign: "center" }}>
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)", marginBottom: 8 }}>POIDS ACTUEL</p>
-          <p style={{ fontFamily: "var(--font-syne)", fontSize: 72, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+          <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 72, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
             <FlipNumber value={latest ? `${latest}` : "—"} />
             <span style={{ fontSize: 24, color: "rgba(248,248,255,0.35)", marginLeft: 6 }}>KG</span>
           </p>
@@ -221,7 +221,7 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       {/* Stats pills */}
       <div style={{ display: "flex", gap: 8 }}>
         {[["MIN", min], ["MOY", avg], ["MAX", max]].map(([l, v]) => (
-          <div key={l as string} style={{ flex: 1, background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
+          <div key={l as string} style={{ flex: 1, background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
             <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(248,248,255,0.25)", marginBottom: 4 }}>{l as string}</p>
             <p style={{ fontFamily: "var(--font-space)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{v as number} kg</p>
           </div>
@@ -229,21 +229,21 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)" }}>ENREGISTRER</p>
         <div style={{ display: "flex", gap: 10 }}>
           <input {...register("date")} type="date" className="input-dark" style={{ flex: 1 }} />
           <input {...register("weight")} type="number" step="0.1" placeholder="75.5" className="input-dark" style={{ flex: 1 }} />
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
+        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
           ENREGISTRER
         </motion.button>
       </form>
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20 }}>
-          <p style={{ fontFamily: "var(--font-syne)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>ÉVOLUTION</p>
+        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20 }}>
+          <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>ÉVOLUTION</p>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
               <defs>
@@ -287,7 +287,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Donut */}
       {latest && (
-        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 24 }}>
+        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
               <ResponsiveContainer width={160} height={160}>
@@ -298,7 +298,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                <span style={{ fontFamily: "var(--font-syne)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>{latest.calories}</span>
+                <span style={{ fontFamily: "var(--font-orbitron)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>{latest.calories}</span>
                 <span style={{ fontSize: 10, color: "rgba(248,248,255,0.35)", letterSpacing: "0.08em" }}>KCAL</span>
               </div>
             </div>
@@ -325,7 +325,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
       )}
 
       {/* Import CSV + Form */}
-      <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)" }}>ENREGISTRER</p>
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", gap: 8 }}>
@@ -337,7 +337,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
             <input {...register("carbs")} type="number" step="0.1" placeholder="Gluc. g" className="input-dark" />
             <input {...register("fat")} type="number" step="0.1" placeholder="Lip. g" className="input-dark" />
           </div>
-          <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
+          <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
             ENREGISTRER
           </motion.button>
         </form>
@@ -382,7 +382,7 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
               <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)", marginBottom: 8 }}>
                 {latest.bedtime && latest.wakeTime ? `${latest.bedtime} → ${latest.wakeTime}` : "DERNIÈRE NUIT"}
               </p>
-              <p style={{ fontFamily: "var(--font-syne)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)" }}>
+              <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)" }}>
                 <FlipNumber value={latest.duration.toFixed(1)} />
                 <span style={{ fontSize: 20, color: "rgba(248,248,255,0.35)", marginLeft: 6 }}>H</span>
               </p>
@@ -414,8 +414,8 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
 
       {/* 14-day chart */}
       {last14.length > 0 && (
-        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20 }}>
-          <p style={{ fontFamily: "var(--font-syne)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>14 DERNIÈRES NUITS</p>
+        <div style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20 }}>
+          <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>14 DERNIÈRES NUITS</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={last14} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
               <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
@@ -433,7 +433,7 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(248,248,255,0.3)" }}>ENREGISTRER</p>
         <input {...register("date")} type="date" className="input-dark" />
         <div style={{ display: "flex", gap: 8 }}>
@@ -446,7 +446,7 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
             <input {...register("wakeTime")} type="time" className="input-dark" />
           </div>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
+        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
           ENREGISTRER
         </motion.button>
       </form>

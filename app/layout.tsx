@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Syne, Space_Grotesk } from "next/font/google";
+import { Orbitron, Space_Grotesk } from "next/font/google";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
-import CircuitBackground from "@/components/CircuitBackground";
 import PageTransitionWrapper from "@/components/PageTransitionWrapper";
 import { Toaster } from "sonner";
 
-const syne = Syne({
+const VideoBackground = dynamic(() => import("@/components/VideoBackground"), { ssr: false });
+
+const orbitron = Orbitron({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-syne",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-orbitron",
   display: "swap",
 });
 
@@ -30,9 +32,7 @@ export const metadata: Metadata = {
     title: "MyDashboard",
   },
   icons: {
-    apple: [
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
-    ],
+    apple: [{ url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" }],
   },
 };
 
@@ -42,17 +42,17 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#030305",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${syne.variable} ${spaceGrotesk.variable}`}>
+    <html lang="fr" className={`${orbitron.variable} ${spaceGrotesk.variable}`}>
       <body
         className="antialiased"
-        style={{ background: "#030305", color: "#F8F8FF", fontFamily: "var(--font-space), system-ui, sans-serif" }}
+        style={{ background: "#000000", color: "#FFFFFF", fontFamily: "var(--font-space), system-ui, sans-serif" }}
       >
-        <CircuitBackground />
+        <VideoBackground />
         <main className="pb-nav min-h-screen max-w-lg mx-auto relative z-10">
           <PageTransitionWrapper>{children}</PageTransitionWrapper>
         </main>
@@ -62,9 +62,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           position="top-center"
           toastOptions={{
             style: {
-              background: "rgba(13,13,26,0.98)",
-              border: "1px solid rgba(99,102,241,0.2)",
-              color: "#F8F8FF",
+              background: "rgba(0,0,0,0.92)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              color: "#FFFFFF",
               backdropFilter: "blur(16px)",
               fontFamily: "var(--font-space)",
             },

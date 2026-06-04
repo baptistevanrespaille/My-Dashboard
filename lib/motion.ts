@@ -1,11 +1,9 @@
 import { useReducedMotion } from "framer-motion";
 
-// ─── Easing ───────────────────────────────────────────────────────────────────
 export const EASE_OUT  = [0.25, 0.46, 0.45, 0.94] as [number,number,number,number];
 export const EASE_IN   = [0.4,  0,    1,    1]    as [number,number,number,number];
 export const EASE_BOTH = [0.32, 0.72, 0,    1]    as [number,number,number,number];
 
-// ─── Page transition (blur + scale + y) ──────────────────────────────────────
 export const pageTransition = {
   initial:    { opacity: 0, filter: "blur(16px)", scale: 0.97, y: 40 },
   animate:    { opacity: 1, filter: "blur(0px)",  scale: 1,    y: 0  },
@@ -13,7 +11,6 @@ export const pageTransition = {
   transition: { duration: 0.65, ease: EASE_OUT },
 };
 
-// ─── Section blur slide up ────────────────────────────────────────────────────
 export const blurSlideUp = {
   initial:    { opacity: 0, filter: "blur(12px)", y: 28 },
   animate:    { opacity: 1, filter: "blur(0px)",  y: 0  },
@@ -21,7 +18,6 @@ export const blurSlideUp = {
   transition: { duration: 0.7, ease: EASE_OUT },
 };
 
-// ─── Stagger ──────────────────────────────────────────────────────────────────
 export const staggerContainer = {
   animate: { transition: { staggerChildren: 0.09 } },
 };
@@ -32,58 +28,36 @@ export const staggerItem = {
   transition: { duration: 0.7, ease: EASE_OUT },
 };
 
-// ─── Word-by-word hero title ──────────────────────────────────────────────────
-export const wordVariants = {
-  initial:    { opacity: 0, filter: "blur(10px)", y: 40 },
-  midpoint:   { opacity: 0.5, filter: "blur(4px)", y: -4 },
-  animate:    { opacity: 1, filter: "blur(0px)",  y: 0  },
-};
-
-export function getWordTransition(i: number) {
-  return { duration: 0.7, delay: i * 0.1, ease: EASE_OUT };
-}
-
-// ─── Card hover ───────────────────────────────────────────────────────────────
 export const cardHover = {
-  whileHover: { y: -7,  scale: 1.018 },
+  whileHover: { y: -5, scale: 1.015 },
   whileTap:   { scale: 0.97 },
   transition: { type: "spring", stiffness: 300, damping: 22 },
 };
 
-// ─── Button ───────────────────────────────────────────────────────────────────
 export const buttonHover = {
   whileHover: { scale: 1.05 },
   whileTap:   { scale: 0.97 },
   transition: { type: "spring", stiffness: 400, damping: 20 },
 };
 
-// ─── Spring presets ───────────────────────────────────────────────────────────
 export const SPRING_STANDARD = { type: "spring", stiffness: 380, damping: 35 } as const;
 export const SPRING_BOUNCY   = { type: "spring", stiffness: 500, damping: 25 } as const;
 export const SPRING_SLOW     = { type: "spring", stiffness: 200, damping: 30 } as const;
 
-// ─── Gradient divider ─────────────────────────────────────────────────────────
-export const gradientDividerStyle = (color = "#6366F1") => ({
+export const gradientDividerStyle = (_color?: string) => ({
   height: 1,
-  background: `linear-gradient(90deg, transparent, ${color}33, transparent)`,
+  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)",
   margin: "10px 0 14px",
 });
 
-// ─── useMotionConfig : respects prefers-reduced-motion ───────────────────────
 export function useMotionConfig() {
   const prefersReduced = useReducedMotion();
-
   const safeBlurSlideUp = prefersReduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.3 } }
     : blurSlideUp;
-
   const safeStaggerItem = prefersReduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.3 } }
     : staggerItem;
-
-  const safeCardHover = prefersReduced
-    ? { whileTap: { opacity: 0.85 } }
-    : cardHover;
-
+  const safeCardHover = prefersReduced ? { whileTap: { opacity: 0.85 } } : cardHover;
   return { prefersReduced, safeBlurSlideUp, safeStaggerItem, safeCardHover };
 }

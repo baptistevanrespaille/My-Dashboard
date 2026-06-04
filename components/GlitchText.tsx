@@ -22,18 +22,14 @@ export default function GlitchText({
 
   useEffect(() => {
     if (disabled || typeof window === "undefined") return;
-    const el = elRef.current;
-    if (!el) return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) return;
 
     function scheduleGlitch() {
-      timerRef.current = setTimeout(() => { runGlitchSequence(); }, 5000 + Math.random() * 4000);
+      timerRef.current = setTimeout(runGlitchSequence, 5000 + Math.random() * 4000);
     }
 
     function runGlitchSequence() {
-      const target = elRef.current;
-      if (!target) return;
       const pulses = 3 + Math.floor(Math.random() * 3);
       let pulse = 0;
 
@@ -48,9 +44,10 @@ export default function GlitchText({
         const ty = (Math.random() - 0.5) * 2;
         const i1 = Math.floor(Math.random() * 40);
         const i2 = Math.floor(Math.random() * 40);
+        // White-only glitch shadows
         t.style.transform = `translateX(${tx}px) translateY(${ty}px)`;
         t.style.clipPath = `inset(${i1}% 0 ${i2}% 0)`;
-        t.style.textShadow = `${(Math.random() - 0.5) * 4}px 0 #6366F1, ${(Math.random() - 0.5) * 4}px 0 #F59E0B`;
+        t.style.textShadow = `${(Math.random()-0.5)*4}px 0 rgba(255,255,255,0.8), ${(Math.random()-0.5)*4}px 0 rgba(255,255,255,0.4)`;
 
         setTimeout(() => {
           const t2 = elRef.current;
@@ -72,10 +69,10 @@ export default function GlitchText({
     style: { display: "inline-block", willChange: "transform", ...style },
   };
 
-  if (as === "h1") return <h1 {...sharedProps}>{children}</h1>;
-  if (as === "h2") return <h2 {...sharedProps}>{children}</h2>;
-  if (as === "h3") return <h3 {...sharedProps}>{children}</h3>;
-  if (as === "p")  return <p  {...sharedProps}>{children}</p>;
+  if (as === "h1")  return <h1  {...sharedProps}>{children}</h1>;
+  if (as === "h2")  return <h2  {...sharedProps}>{children}</h2>;
+  if (as === "h3")  return <h3  {...sharedProps}>{children}</h3>;
+  if (as === "p")   return <p   {...sharedProps}>{children}</p>;
   if (as === "div") return <div {...sharedProps}>{children}</div>;
   return <span {...sharedProps}>{children}</span>;
 }

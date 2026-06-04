@@ -16,11 +16,11 @@ if (typeof window !== "undefined") {
   import("canvas-confetti").then((m) => { confetti = m.default; });
 }
 
-const ACCENT  = "#6366F1";
-const GOLD    = "#F59E0B";
-const SUCCESS = "#10B981";
-const DANGER  = "#EF4444";
-const WARNING = "#F59E0B";
+const ACCENT  = "#FFFFFF";
+const GOLD    = "#FFFFFF";
+const SUCCESS = "#FFFFFF";
+const DANGER  = "rgba(255,255,255,0.5)";
+const WARNING = "#FFFFFF";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type Task = {
@@ -163,7 +163,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              style={{ fontFamily: "var(--font-syne)", fontSize: 40, color: GOLD, letterSpacing: "0.05em", textShadow: `0 0 40px ${GOLD}` }}
+              style={{ fontFamily: "var(--font-orbitron)", fontSize: 40, color: GOLD, letterSpacing: "0.05em", textShadow: `0 0 40px ${GOLD}` }}
             >
               TOUT ACCOMPLI
             </motion.p>
@@ -175,7 +175,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
           <div>
-            <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>TÂCHES</h1>
+            <h1 style={{ fontFamily: "var(--font-orbitron)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>TÂCHES</h1>
             <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6, fontFamily: "var(--font-space)" }}>
               {format(new Date(), "d MMMM yyyy", { locale: fr }).toUpperCase()}
             </p>
@@ -213,7 +213,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
               animate={{ opacity: 1, scale: 1 }}
               style={{ background: `${SUCCESS}12`, border: `1px solid ${SUCCESS}30`, borderRadius: 20, padding: 20, textAlign: "center" }}
             >
-              <p style={{ fontFamily: "var(--font-syne)", fontSize: 24, letterSpacing: "0.05em", color: SUCCESS }}>TOUT ACCOMPLI 🎉</p>
+              <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 24, letterSpacing: "0.05em", color: SUCCESS }}>TOUT ACCOMPLI 🎉</p>
               <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 4 }}>Excellent travail, Baptiste !</p>
             </motion.div>
           )}
@@ -280,7 +280,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
         style={{
           display: "flex", alignItems: "center", gap: 8,
           marginTop: 20,
-          background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`,
+          background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`,
           color: "#050508", borderRadius: 14, height: 52,
           width: "100%", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em",
           border: "none", cursor: "pointer", fontFamily: "var(--font-space)",
@@ -299,7 +299,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
             <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${ACCENT}12`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
               <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(248,248,255,0.15)", margin: "12px auto 0" }} />
               <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-syne)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE TÂCHE</span>
+                <span style={{ fontFamily: "var(--font-orbitron)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE TÂCHE</span>
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setAddOpen(false)} style={{ color: "rgba(248,248,255,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
               </div>
               <form onSubmit={handleSubmit(onSubmit)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -333,7 +333,7 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
                     );
                   })}
                 </div>
-                <motion.button type="submit" whileTap={{ scale: 0.97 }} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 50, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
+                <motion.button type="submit" whileTap={{ scale: 0.97 }} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`, color: "#050508", borderRadius: 12, height: 50, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)" }}>
                   AJOUTER
                 </motion.button>
               </form>

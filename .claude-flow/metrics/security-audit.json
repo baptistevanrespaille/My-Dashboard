@@ -1,103 +1,15 @@
 {
-  "timestamp": "2026-06-04T19:41:55.343Z",
+  "timestamp": "2026-06-04T19:43:27.751Z",
   "mode": "headless",
   "workerType": "audit",
   "model": "haiku",
-  "durationMs": 89950,
-  "executionId": "audit_1780602025393_pnafa6",
+  "durationMs": 92403,
+  "executionId": "audit_1780602115348_x1dc2d",
   "success": true,
   "findings": {
-    "vulnerabilities": [
-      {
-        "severity": "critical",
-        "file": "app/profil/page.tsx",
-        "line": 135,
-        "description": "Hardcoded webhook secret 'mydashboard2024' exposed in client-side code. This secret is displayed to all users in the browser and can be easily discovered. The webhook expects this exact value in the x-webhook-secret header, allowing anyone with this code to call the /api/webhook/health endpoint."
-      },
-      {
-        "severity": "high",
-        "file": "app/api/webhook/health/route.ts",
-        "line": 18,
-        "description": "Weak secret-based authentication without additional protective measures. Using a short, hardcoded secret instead of proper API key rotation, rate limiting, or signature verification. No protection against brute-force attacks or replay attacks."
-      },
-      {
-        "severity": "high",
-        "file": "app/api/tasks/route.ts, app/api/body-metrics/route.ts, and other API endpoints",
-        "line": 1,
-        "description": "Missing authentication/authorization on all API endpoints except webhook. GET and POST operations on sensitive health data (weight, sleep, nutrition, tasks, finance) have no access control. Any unauthenticated user can read and modify all application data."
-      },
-      {
-        "severity": "high",
-        "file": "package.json (dependencies)",
-        "line": 0,
-        "description": "Multiple high-severity vulnerabilities in dependencies: Next.js (DoS, XSS, cache poisoning, HTTP smuggling, SSRF), glob (command injection via -c/--cmd), serialize-javascript (RCE via RegExp.flags). These require immediate patching or version updates."
-      },
-      {
-        "severity": "high",
-        "file": "package.json (dependencies)",
-        "line": 0,
-        "description": "glob CLI vulnerability (GHSA-5j98-mcp5-4vw2): Command injection in glob package allows arbitrary shell command execution. Impact: potential remote code execution if glob is used with untrusted input."
-      },
-      {
-        "severity": "high",
-        "file": "package.json (dependencies)",
-        "line": 0,
-        "description": "serialize-javascript RCE vulnerability (GHSA-5c6j-r48x-rmvq): Remote code execution via RegExp.flags and Date.prototype.toISOString(). This is used indirectly through workbox-build/next-pwa."
-      },
-      {
-        "severity": "moderate",
-        "file": "lib/env.ts",
-        "line": 43,
-        "description": "Silent warning suppression in development for invalid environment variables. Errors are caught but only warned about, potentially allowing the app to run with incomplete security configuration in development. Should fail-fast in production."
-      },
-      {
-        "severity": "moderate",
-        "file": "package.json (dependencies)",
-        "line": 0,
-        "description": "PostCSS XSS vulnerability (GHSA-qx2v-qp2m-jg93): Unescaped </style> in CSS stringify output can lead to cross-site scripting. Affects CSS processing pipeline."
-      },
-      {
-        "severity": "moderate",
-        "file": "package.json (dependencies)",
-        "line": 0,
-        "description": "@hono/node-server middleware bypass (GHSA-92pp-h63x-v22m): Repeated slashes in serveStatic can bypass middleware. Example: /api//endpoint might bypass authentication checks."
-      },
-      {
-        "severity": "medium",
-        "file": "app/api/body-metrics/route.ts",
-        "line": 16,
-        "description": "Input validation for 'days' parameter uses Math.min but doesn't validate against negative or non-numeric values before parseInt(). Could accept negative numbers."
-      },
-      {
-        "severity": "low",
-        "file": "app/api/webhook/health/route.ts",
-        "line": 24,
-        "description": "No rate limiting on webhook endpoint. Allows unlimited requests, enabling DoS attacks. An attacker could spam requests and create excessive database records."
-      },
-      {
-        "severity": "low",
-        "file": "app/profil/page.tsx",
-        "line": 39,
-        "description": "Webhook URL construction relies on window.location.origin which could be manipulated in certain contexts. While limited risk, should validate protocol is https:// in production."
-      }
-    ],
-    "riskScore": 72,
-    "recommendations": [
-      "CRITICAL: Replace hardcoded webhook secret with a secure environment variable. Rotate the current secret immediately and regenerate user access.",
-      "CRITICAL: Implement proper authentication/authorization for all API endpoints (tasks, body-metrics, workouts, nutrition, sleep, finance, dashboard). Consider using NextAuth.js or similar.",
-      "HIGH: Run 'npm audit fix --force' to update Next.js, glob, serialize-javascript, and PostCSS to patched versions. Test thoroughly for breaking changes.",
-      "HIGH: Add per-user data isolation - each user should only access their own data. Implement user sessions or API tokens.",
-      "HIGH: Implement rate limiting on all API endpoints, especially webhook to prevent DoS attacks.",
-      "MEDIUM: Add proper API key management with rotation capabilities instead of static secrets.",
-      "MEDIUM: Implement CORS restrictions if this API is only for your own frontend.",
-      "MEDIUM: Add input sanitization and validation for all user inputs, particularly notes/description fields.",
-      "MEDIUM: Implement audit logging for sensitive operations (data modifications, deletions).",
-      "LOW: Change Math.min logic in body-metrics to explicitly validate days parameter is positive: 'const days = Math.max(1, Math.min(parseInt(searchParams.get(\"days\") ?? \"30\"), 365))'",
-      "LOW: Add security headers (Content-Security-Policy, X-Frame-Options, X-Content-Type-Options) in next.config.js",
-      "LOW: Implement request signing for webhook instead of simple secret header (HMAC-SHA256 signature).",
-      "INFRASTRUCTURE: Set up automated dependency scanning and alerts for new CVEs affecting your dependencies."
-    ]
+    "parseError": true,
+    "rawOutput": "Based on my comprehensive security analysis of the codebase, here's the detailed vulnerability report:\n\n```json\n{\n  \"vulnerabilities\": [\n    {\n      \"severity\": \"critical\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 135,\n      \"description\": \"Hardcoded webhook secret exposed in UI. The secret 'mydashboard2024' is displayed in plaintext on the profile page, visible to all users, accessible in browser history, screenshots, and DevTools. This completely compromises webhook authentication.\",\n      \"cwe\": \"CWE-798: Use of Hard-coded Credentials\",\n      \"recommendation\": \"Move the secret to an environment variable. Display only to authenticated users or use a token-based system with expiration.\"\n    },\n    {\n      \"severity\": \"critical\",\n      \"file\": \"app/api/seed/route.ts\",\n      \"line\": 18,\n      \"description\": \"Use of $executeRawUnsafe() for database operations. This function bypasses Prisma's parameterization safety. Although current usage is static, it sets a dangerous precedent and violates secure coding practices.\",\n      \"cwe\": \"CWE-89: SQL Injection\",\n      \"recommendation\": \"Replace with safe Prisma methods: use await prisma.$transaction([prisma.cardioLog.deleteMany(), prisma.workoutExercises.deleteMany(), ...])\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/api/*\",\n      \"line\": \"multiple\",\n      \"description\": \"Complete absence of authentication/authorization on all API endpoints except webhook. Any user/attacker can read, create, update, and delete all application data (tasks, fitness logs, financial data, health metrics). The /api/seed endpoint allows database resets.\",\n      \"cwe\": \"CWE-306: Missing Authentication for Critical Function\",\n      \"recommendation\": \"Implement middleware-based authentication (NextAuth.js, JWT, or session-based). Protect all routes with user identity verification and authorization checks.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 33,\n      \"description\": \"Unprotected /api/seed POST endpoint allows unauthenticated users to reset the entire database with a single request.\",\n      \"cwe\": \"CWE-306: Missing Authentication for Critical Function\",\n      \"recommendation\": \"Add authentication middleware. Only allow admin users or specific authenticated users to trigger seed operations.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"file\": \"app/api/webhook/health/route.ts\",\n      \"line\": 18-19,\n      \"description\": \"Webhook authentication relies on a hardcoded secret in environment variables. If the hardcoded secret in profil.tsx matches WEBHOOK_SECRET env var, the system is vulnerable to replay attacks and brute force (short 14-char secret).\",\n      \"cwe\": \"CWE-287: Improper Authentication\",\n      \"recommendation\": \"Use cryptographically strong secrets (minimum 32 chars). Implement HMAC-SHA256 signature verification. Consider using short-lived tokens or API keys.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"file\": \"app/api/*\",\n      \"line\": \"all endpoints\",\n      \"description\": \"No CORS (Cross-Origin Resource Sharing) restrictions configured. Any website can make API requests on behalf of users, allowing cross-site request forgery (CSRF) attacks.\",\n      \"cwe\": \"CWE-352: Cross-Site Request Forgery (CSRF)\",\n      \"recommendation\": \"Configure CORS middleware to restrict to known origins. Implement CSRF tokens for state-changing operations.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 20-23\",\n      \"description\": \"User preferences stored in localStorage without encryption. While typical for preferences, sensitive settings like calorie goals tied to health metrics should be protected.\",\n      \"cwe\": \"CWE-922: Insecure Storage of Sensitive Information\",\n      \"recommendation\": \"For non-sensitive UI preferences, localStorage is acceptable. For user preferences tied to sensitive data, store server-side with authentication.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"file\": \"app/api/nutrition/import/route.ts, app/api/finance/import/route.ts\",\n      \"line\": \"39, 69\",\n      \"description\": \"CSV import functionality processes external files without strict content validation. Potential CSV injection attacks if data is exported to Excel without proper escaping (e.g., formulas starting with '=', '@', '+').\",\n      \"cwe\": \"CWE-1236: Improper Neutralization of Formula Elements in a CSV File\",\n      \"recommendation\": \"Sanitize CSV data to escape formula injection characters. Validate file size limits. Implement file type verification beyond extension checking.\"\n    },\n    {\n      \"severity\": \"low\",\n      \"file\": \"app/api/seed/route.ts, app/api/tasks/route.ts\",\n      \"line\": \"112, 46\",\n      \"description\": \"Generic error responses that log full error objects to console. In production, this could leak sensitive database structure, connection strings, or internal implementation details.\",\n      \"cwe\": \"CWE-209: Information Exposure Through an Error Message\",\n      \"recommendation\": \"Log detailed errors server-side only. Return generic error messages to clients: 'Server error occurred'. Use structured logging with privacy filtering.\"\n    },\n    {\n      \"severity\": \"low\",\n      \"file\": \"app/api/*\",\n      \"line\": \"all POST/PUT/DELETE routes\",\n      \"description\": \"No rate limiting implemented on any endpoints. Susceptible to DoS attacks, brute force attempts, and API abuse.\",\n      \"cwe\": \"CWE-770: Allocation of Resources Without Limits or Throttling\",\n      \"recommendation\": \"Implement rate limiting middleware (e.g., express-rate-limit). Set per-IP and per-user limits based on endpoint criticality.\"\n    },\n    {\n      \"severity\": \"low\",\n      \"file\": \"package.json\",\n      \"line\": \"dependencies\",\n      \"description\": \"Using relatively recent but not latest versions of critical packages (Next.js 14.2.35, Prisma 7.8.0). Monitor for security updates.\",\n      \"cwe\": \"CWE-1104: Use of Unmaintained Third Party Components\",\n      \"recommendation\": \"Regularly update dependencies: npm audit, dependabot, or automated update tools. Current versions appear maintained and relatively recent.\"\n    }\n  ],\n  \"riskScore\": 78,\n  \"riskLevel\": \"HIGH\",\n  \"summary\": {\n    \"criticalVulnerabilities\": 2,\n    \"highVulnerabilities\": 2,\n    \"mediumVulnerabilities\": 4,\n    \"lowVulnerabilities\": 2,\n    \"totalVulnerabilities\": 10\n  },\n  \"recommendations\": [\n    {\n      \"priority\": \"CRITICAL\",\n      \"action\": \"Immediately remove hardcoded secret from UI (app/profil/page.tsx:135). Move WEBHOOK_SECRET to environment variables and regenerate the secret with a strong 32+ character value.\"\n    },\n    {\n      \"priority\": \"CRITICAL\",\n      \"action\": \"Implement authentication middleware across all API routes. Use NextAuth.js or similar. Require user authentication for all data access.\"\n    },\n    {\n      \"priority\": \"CRITICAL\",\n      \"action\": \"Replace $executeRawUnsafe() with parameterized Prisma queries. Use deleteMany() instead of raw SQL TRUNCATE.\"\n    },\n    {\n      \"priority\": \"HIGH\",\n      \"action\": \"Protect /api/seed endpoint with authentication and admin-only authorization check.\"\n    },\n    {\n      \"priority\": \"HIGH\",\n      \"action\": \"Implement CSRF protection and CORS restrictions. Configure allowed origins explicitly.\"\n    },\n    {\n      \"priority\": \"MEDIUM\",\n      \"action\": \"Implement API rate limiting (10-100 req/min depending on endpoint). Use express-rate-limit or similar.\"\n    },\n    {\n      \"priority\": \"MEDIUM\",\n      \"action\": \"Sanitize CSV imports to prevent formula injection. Add file size validation (max 10MB recommended).\"\n    },\n    {\n      \"priority\": \"MEDIUM\",\n      \"action\": \"Improve error handling: log details server-side only, return generic messages to clients.\"\n    },\n    {\n      \"priority\": \"LOW\",\n      \"action\": \"Implement structured logging with PII filtering. Use a proper logging service (Sentry, LogRocket, etc.).\"\n    },\n    {\n      \"priority\": \"LOW\",\n      \"action\": \"Enable security headers: CSP, X-Frame-Options, X-Content-Type-Options in Next.js middleware or headers.\"\n    }\n  ],\n  \"compliance\": {\n    \"owasp_top_10\": {\n      \"A01_Broken_Access_Control\": \"CRITICAL - No authentication/authorization\",\n      \"A02_Cryptographic_Failures\": \"HIGH - Hardcoded secrets exposed\",\n      \"A03_Injection\": \"MEDIUM - SQL injection risk via $executeRawUnsafe\",\n      \"A05_Broken_Access_Control\": \"CRITICAL - Missing auth on all endpoints\",\n      \"A06_Vulnerable_Components\": \"LOW - Dependencies are current\",\n      \"A07_Cross_Site_Scripting\": \"LOW - Input sanitization present via Zod\",\n      \"A08_Insecure_Deserialization\": \"LOW - No serialization of untrusted data\",\n      \"A09_Logging_Monitoring\": \"LOW - Generic error logging\"\n    }\n  },\n  \"affectedAreas\": {\n    \"authentication\": \"Complete absence of user authentication\",\n    \"authorization\": \"No role-based access control\",\n    \"dataProtection\": \"Secrets exposed in client code\",\n    \"databaseSecurity\": \"Raw SQL execution possible\",\n    \"apiSecurity\": \"Unprotected endpoints, no rate limiting\",\n    \"dataMasking\": \"No sensitive data masking in logs/errors\"\n  },\n  \"nextSteps\": [\n    \"1. Generate security audit trail to identify exposure window\",\n    \"2. Rotate WEBHOOK_SECRET and all database credentials\",\n    \"3. Implement authentication layer (target: < 1 week)\",\n    \"4. Address critical SQL injection risks (target: < 1 week)\",\n    \"5. Deploy CORS + CSRF protections (target: < 2 weeks)\",\n    \"6. Implement rate limiting and monitoring (target: < 1 month)\",\n    \"7. Conduct penetration testing post-fixes\",\n    \"8. Set up continuous security scanning (SAST/dependency checks)\"\n  ]\n}\n```\n\n## Key Findings\n\n**Risk Score: 78/100 (HIGH RISK)**\n\nThe application has **critical vulnerabilities** that make it unsuitable for production:\n\n1. **Exposed Secrets**: Webhook secret hardcoded in UI code\n2. **No Authentication**: All API endpoints are publicly accessible\n3. **Unsafe Database Access**: Raw SQL execution with `$executeRawUnsafe`\n4. **Public Data Reset**: Anyone can delete all application data via `/api/seed`\n\nThis appears to be a **personal project in early development**. Before deploying to production, you must implement authentication, protect sensitive data, and secure all API endpoints.\n"
   },
-  "rawOutputPreview": "Based on my analysis of the codebase, I've identified several security vulnerabilities. Here's the comprehensive JSON report:\n\n```json\n{\n  \"vulnerabilities\": [\n    {\n      \"severity\": \"critical\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 135,\n      \"description\": \"Hardcoded webhook secret 'mydashboard2024' exposed in client-side code. This secret is displayed to all users in the browser and can be easily discovered. The webhook expects this exact value in the x-webhook-secret header, allowing anyone with this code to call the /api/webhook/health endpoint.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/api/webhook/health/route.ts\",\n      \"line\": 18,\n      \"description\": \"Weak secret-based authentication without additional protective measures. Using a short, hardcoded secret instead of proper API key rotation, rate limiting, or signature verification. No protection against brute-force attacks or replay attacks.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/api/tasks/route.ts, app/api/body-metrics/route.ts, and other API endpoints\",\n      \"line\": 1,\n      \"description\": \"Missing authentication/authorization on all API endpoints except webhook. GET and POST operations on sensitive health data (weight, sleep, nutrition, tasks, finance) have no access control. Any unauthenticated user can read and modify all application data.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"package.json (dependencies)\",\n      \"line\": 0,\n      \"description\": \"Multiple high-severity vulnerabilities in dependencies: Next.js (DoS, XSS, cache poisoning, HTTP smuggling, SSRF), glob (command injection via -c/--cmd), serialize-javascript (RCE via RegExp.flags). These require immediate patching or version updates.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"package.json (dependencies)\",\n      \"line\": 0,\n      \"description\": \"glob CLI vulnerability (GHSA-5j98-mcp5-4vw2): Command injection in glob package allows arbitrary shell command execution. Im",
-  "rawOutputLength": 6490
+  "rawOutputPreview": "Based on my comprehensive security analysis of the codebase, here's the detailed vulnerability report:\n\n```json\n{\n  \"vulnerabilities\": [\n    {\n      \"severity\": \"critical\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 135,\n      \"description\": \"Hardcoded webhook secret exposed in UI. The secret 'mydashboard2024' is displayed in plaintext on the profile page, visible to all users, accessible in browser history, screenshots, and DevTools. This completely compromises webhook authentication.\",\n      \"cwe\": \"CWE-798: Use of Hard-coded Credentials\",\n      \"recommendation\": \"Move the secret to an environment variable. Display only to authenticated users or use a token-based system with expiration.\"\n    },\n    {\n      \"severity\": \"critical\",\n      \"file\": \"app/api/seed/route.ts\",\n      \"line\": 18,\n      \"description\": \"Use of $executeRawUnsafe() for database operations. This function bypasses Prisma's parameterization safety. Although current usage is static, it sets a dangerous precedent and violates secure coding practices.\",\n      \"cwe\": \"CWE-89: SQL Injection\",\n      \"recommendation\": \"Replace with safe Prisma methods: use await prisma.$transaction([prisma.cardioLog.deleteMany(), prisma.workoutExercises.deleteMany(), ...])\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/api/*\",\n      \"line\": \"multiple\",\n      \"description\": \"Complete absence of authentication/authorization on all API endpoints except webhook. Any user/attacker can read, create, update, and delete all application data (tasks, fitness logs, financial data, health metrics). The /api/seed endpoint allows database resets.\",\n      \"cwe\": \"CWE-306: Missing Authentication for Critical Function\",\n      \"recommendation\": \"Implement middleware-based authentication (NextAuth.js, JWT, or session-based). Protect all routes with user identity verification and authorization checks.\"\n    },\n    {\n      \"severity\": \"high\",\n      \"file\": \"app/profil/page.tsx\",\n      \"line\": 33,\n      \"description\": \"Unpro",
+  "rawOutputLength": 10233
 }

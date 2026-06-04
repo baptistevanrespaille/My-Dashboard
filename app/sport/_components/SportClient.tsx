@@ -13,10 +13,10 @@ import Card3D from "@/components/Card3D";
 import FlipNumber from "@/components/FlipNumber";
 import { SPRING_STANDARD, gradientDividerStyle } from "@/lib/motion";
 
-const ACCENT  = "#6366F1";
-const SUCCESS = "#10B981";
-const DANGER  = "#EF4444";
-const WARNING = "#F59E0B";
+const ACCENT  = "#FFFFFF";
+const SUCCESS = "#FFFFFF";
+const DANGER  = "rgba(255,255,255,0.5)";
+const WARNING = "#FFFFFF";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 export type Session = {
@@ -125,7 +125,7 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
 
       {/* HEADER */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
-        <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SPORT</h1>
+        <h1 style={{ fontFamily: "var(--font-orbitron)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SPORT</h1>
         <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6, fontFamily: "var(--font-space)" }}>
           {format(new Date(), "MMMM yyyy", { locale: fr }).toUpperCase()}
           <span style={{ color: ACCENT, margin: "0 8px" }}>·</span>
@@ -144,9 +144,9 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
           { label: "VOLUME", value: `${(monthVolume / 1000).toFixed(1)}`, unit: "t" },
           { label: "KM", value: `${monthKm.toFixed(1)}`, unit: "km" },
         ].map((s, i) => (
-          <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 16, padding: "12px 10px", textAlign: "center" }}>
+          <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 16, padding: "12px 10px", textAlign: "center" }}>
             <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(248,248,255,0.25)", marginBottom: 4 }}>{s.label}</p>
-            <p style={{ fontFamily: "var(--font-syne)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>
+            <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>
               <FlipNumber value={s.value} /><span style={{ fontSize: 13, color: "rgba(248,248,255,0.35)", marginLeft: 2 }}>{s.unit}</span>
             </p>
           </div>
@@ -154,7 +154,7 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
       </motion.div>
 
       {/* CHART */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
         <div style={{ display: "flex", background: "var(--surface-2)", borderRadius: 12, padding: 4, marginBottom: 16 }}>
           {([["freq", "FRÉQUENCE"], ["volume", "VOLUME"], ["distance", "DISTANCE"]] as const).map(([k, l]) => (
             <button key={k} onClick={() => setActiveTab(k)} style={{
@@ -217,14 +217,14 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
       {/* SESSION LIST */}
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {Object.keys(grouped).length === 0 ? (
-          <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 48, textAlign: "center" }}>
+          <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 48, textAlign: "center" }}>
             <Dumbbell size={36} style={{ color: "rgba(248,248,255,0.15)", display: "block", margin: "0 auto 12px" }} />
             <p style={{ color: "rgba(248,248,255,0.3)", fontSize: 14 }}>Aucune session. Lance-toi !</p>
           </div>
         ) : (
           Object.entries(grouped).map(([week, wSessions], wi) => (
             <motion.div key={week} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + wi * 0.06, duration: 0.4, ease: [0.32, 0.72, 0, 1] }}>
-              <p style={{ fontFamily: "var(--font-syne)", fontSize: 18, letterSpacing: "0.08em", color: "rgba(248,248,255,0.25)", marginBottom: 10 }}>{week}</p>
+              <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 18, letterSpacing: "0.08em", color: "rgba(248,248,255,0.25)", marginBottom: 10 }}>{week}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {wSessions.map((s) => (
                   <SessionCard key={s.id} session={s} expanded={expanded === s.id} onToggle={() => setExpanded(expanded === s.id ? null : s.id)} />
@@ -242,7 +242,7 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
         style={{
           position: "fixed", bottom: 100, right: 20,
           width: 64, height: 64, borderRadius: "50%",
-          background: `radial-gradient(circle at 40% 35%, ${ACCENT}, #4F46E5)`,
+          background: `radial-gradient(circle at 40% 35%, ${ACCENT}, rgba(255,255,255,0.8))`,
           border: "none", cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
           boxShadow: `0 8px 32px ${ACCENT}40, 0 0 0 1px ${ACCENT}25`,
@@ -270,7 +270,7 @@ function SessionCard({ session, expanded, onToggle }: { session: Session; expand
 
   return (
     <Card3D maxRotation={3}>
-      <motion.div layout style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, overflow: "hidden", borderLeft: `4px solid ${color}` }}>
+      <motion.div layout style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, overflow: "hidden", borderLeft: `4px solid ${color}` }}>
         <button onClick={onToggle} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 16px 14px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", minHeight: 64 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: color + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {isCardio ? <Timer size={17} style={{ color }} /> : <Dumbbell size={17} style={{ color }} />}

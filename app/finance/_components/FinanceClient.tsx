@@ -15,10 +15,10 @@ import Card3D from "@/components/Card3D";
 import PulsingGlow from "@/components/PulsingGlow";
 import FlipNumber from "@/components/FlipNumber";
 
-const ACCENT  = "#6366F1";
-const GOLD    = "#F59E0B";
-const SUCCESS = "#10B981";
-const DANGER  = "#EF4444";
+const ACCENT  = "#FFFFFF";
+const GOLD    = "#FFFFFF";
+const SUCCESS = "#FFFFFF";
+const DANGER  = "rgba(255,255,255,0.5)";
 const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type Snapshot = { date: string; bankBalance: number; totalInvested: number; totalValue: number; total: number };
@@ -125,7 +125,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
 
       {/* HEADER */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
-        <h1 style={{ fontFamily: "var(--font-syne)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>FINANCE</h1>
+        <h1 style={{ fontFamily: "var(--font-orbitron)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>FINANCE</h1>
         <p style={{ fontSize: 13, color: "rgba(248,248,255,0.45)", marginTop: 6 }}>Patrimoine · Investissements · Suivi</p>
         <div style={{ height: 1, marginTop: 16, background: `linear-gradient(90deg, transparent, ${GOLD}33, transparent)` }} />
       </motion.div>
@@ -135,17 +135,17 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
         <PulsingGlow intensity="medium">
           <Card3D maxRotation={8} className="carbon" style={{ borderRadius: 22 }}>
             <div style={{
-              background: `linear-gradient(135deg, rgba(201,168,76,0.06) 0%, var(--surface-1) 50%, var(--surface-2) 100%)`,
+              background: `linear-gradient(135deg, rgba(255,255,255,0.12) 0%, var(--surface-1) 50%, var(--surface-2) 100%)`,
               border: `1px solid ${GOLD}30`,
               borderRadius: 22, padding: 24,
-              boxShadow: `0 0 40px rgba(201,168,76,0.06)`,
+              boxShadow: `0 0 40px rgba(255,255,255,0.12)`,
             }}>
               <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: GOLD, marginBottom: 12 }}>PATRIMOINE TOTAL</p>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontFamily: "var(--font-syne)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+                <span style={{ fontFamily: "var(--font-orbitron)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
                   <FlipNumber value={total > 0 ? String(Math.floor(total)) : "0"} />
                 </span>
-                <span style={{ fontFamily: "var(--font-syne)", fontSize: 28, color: GOLD, opacity: 0.7, paddingBottom: 4 }}>€</span>
+                <span style={{ fontFamily: "var(--font-orbitron)", fontSize: 28, color: GOLD, opacity: 0.7, paddingBottom: 4 }}>€</span>
               </div>
 
               {/* Variation 7j */}
@@ -195,8 +195,8 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
 
       {/* GRAPHIQUE */}
       {chartData.length > 1 && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
-          <p style={{ fontFamily: "var(--font-syne)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 8 }}>ÉVOLUTION</p>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+          <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 8 }}>ÉVOLUTION</p>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             {[["Banque", ACCENT], ["Investissements", GOLD]].map(([l, c]) => (
               <div key={l as string} style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -226,16 +226,16 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
       )}
 
       {/* PORTEFEUILLE */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(13,13,26,0.92)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <p style={{ fontFamily: "var(--font-syne)", fontSize: 22, letterSpacing: "0.03em", color: "var(--text-primary)" }}>PORTEFEUILLE</p>
+          <p style={{ fontFamily: "var(--font-orbitron)", fontSize: 22, letterSpacing: "0.03em", color: "var(--text-primary)" }}>PORTEFEUILLE</p>
           <div style={{ display: "flex", gap: 8 }}>
             <motion.button whileTap={{ scale: 0.92 }} onClick={handleRefresh} style={{ background: "var(--surface-3)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(248,248,255,0.5)" }}>
               <motion.div animate={{ rotate: refreshing ? 360 : 0 }} transition={{ duration: 1, repeat: refreshing ? Infinity : 0, ease: "linear" }}>
                 <RefreshCw size={15} />
               </motion.div>
             </motion.button>
-            <motion.button whileTap={{ scale: 0.96 }} onClick={() => setInvModal(true)} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 10, height: 38, padding: "0 14px", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", display: "flex", alignItems: "center", gap: 5 }}>
+            <motion.button whileTap={{ scale: 0.96 }} onClick={() => setInvModal(true)} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`, color: "#050508", borderRadius: 10, height: 38, padding: "0 14px", fontWeight: 700, fontSize: 11, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", display: "flex", alignItems: "center", gap: 5 }}>
               <Plus size={13} /> AJOUTER
             </motion.button>
           </div>
@@ -300,7 +300,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
             <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${ACCENT}15`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
               <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(248,248,255,0.15)", margin: "12px auto 0" }} />
               <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-syne)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE POSITION</span>
+                <span style={{ fontFamily: "var(--font-orbitron)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE POSITION</span>
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setInvModal(false)} style={{ color: "rgba(248,248,255,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
               </div>
               <form onSubmit={submitInv(onAddInvestment)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -317,7 +317,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
                   <input {...regInv("avgBuyPrice")} type="number" step="0.01" placeholder="Prix achat" className="input-dark" />
                   <input {...regInv("currentPrice")} type="number" step="0.01" placeholder="Prix actuel" className="input-dark" />
                 </div>
-                <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #4F46E5)`, color: "#050508", borderRadius: 12, height: 48, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", marginTop: 4 }}>
+                <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, rgba(255,255,255,0.8))`, color: "#050508", borderRadius: 12, height: 48, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-space)", marginTop: 4 }}>
                   AJOUTER LA POSITION
                 </motion.button>
               </form>
@@ -334,7 +334,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
             <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${GOLD}20`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
               <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(248,248,255,0.15)", margin: "12px auto 0" }} />
               <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                <span style={{ fontFamily: "var(--font-syne)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVEAU SNAPSHOT</span>
+                <span style={{ fontFamily: "var(--font-orbitron)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVEAU SNAPSHOT</span>
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setSnapshotModal(false)} style={{ color: "rgba(248,248,255,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
               </div>
               <form onSubmit={submitSnap(onSnapshot)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 10 }}>
