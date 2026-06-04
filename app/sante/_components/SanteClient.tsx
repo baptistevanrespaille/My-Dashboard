@@ -221,7 +221,7 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       {/* Stats pills */}
       <div style={{ display: "flex", gap: 8 }}>
         {[["MIN", min], ["MOY", avg], ["MAX", max]].map(([l, v]) => (
-          <div key={l as string} style={{ flex: 1, background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
+          <div key={l as string} style={{ flex: 1, background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
             <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(240,238,232,0.25)", marginBottom: 4 }}>{l as string}</p>
             <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{v as number} kg</p>
           </div>
@@ -229,7 +229,7 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
         <div style={{ display: "flex", gap: 10 }}>
           <input {...register("date")} type="date" className="input-dark" style={{ flex: 1 }} />
@@ -242,7 +242,7 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20 }}>
+        <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20 }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>ÉVOLUTION</p>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
@@ -287,7 +287,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Donut */}
       {latest && (
-        <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 24 }}>
+        <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
               <ResponsiveContainer width={160} height={160}>
@@ -325,7 +325,7 @@ function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSucc
       )}
 
       {/* Import CSV + Form */}
-      <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", gap: 8 }}>
@@ -414,7 +414,7 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
 
       {/* 14-day chart */}
       {last14.length > 0 && (
-        <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20 }}>
+        <div style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20 }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>14 DERNIÈRES NUITS</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={last14} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
@@ -433,7 +433,7 @@ function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: ()
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
         <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
         <input {...register("date")} type="date" className="input-dark" />
         <div style={{ display: "flex", gap: 8 }}>

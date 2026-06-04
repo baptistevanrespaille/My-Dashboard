@@ -195,7 +195,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
 
       {/* GRAPHIQUE */}
       {chartData.length > 1 && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 8 }}>ÉVOLUTION</p>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             {[["Banque", ACCENT], ["Investissements", GOLD]].map(([l, c]) => (
@@ -226,7 +226,7 @@ export default function FinanceClient({ data }: { data: FinanceData }) {
       )}
 
       {/* PORTEFEUILLE */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 22, letterSpacing: "0.03em", color: "var(--text-primary)" }}>PORTEFEUILLE</p>
           <div style={{ display: "flex", gap: 8 }}>
