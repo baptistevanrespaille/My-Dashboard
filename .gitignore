@@ -47,3 +47,4 @@ next-env.d.ts
 
 # Seeds & local scripts
 tsconfig.seed.json
+.env*

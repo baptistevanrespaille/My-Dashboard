@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Plus, ChevronDown, ChevronUp, Dumbbell, Timer, MapPin, Heart } from "lucide-react";
 import { format, parseISO, startOfWeek, addWeeks, getISOWeek } from "date-fns";
@@ -8,7 +8,7 @@ import { fr } from "date-fns/locale";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import PageHeader from "@/components/PageHeader";
 import WorkoutModal from "./WorkoutModal";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export type Session = {
   id: string; date: string; type: string; sessionLabel: string | null;
@@ -37,6 +37,16 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Auto-open modal if ?modal=true is in the URL
+  useEffect(() => {
+    if (searchParams.get("modal") === "true") {
+      setModalOpen(true);
+      // Clean the URL without reload
+      window.history.replaceState(null, "", "/sport");
+    }
+  }, [searchParams]);
 
   // Streak
   let streak = 0;
