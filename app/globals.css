@@ -154,3 +154,95 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* ─── Global Keyframes ─────────────────────────────────────────── */
+@keyframes ambientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes orbFloat {
+  0%   { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes pulseGlow {
+  0%   { box-shadow: var(--glow-from, 0 0 20px rgba(100,149,237,0.08)); }
+  100% { box-shadow: var(--glow-to, 0 0 40px rgba(100,149,237,0.18)); }
+}
+
+@keyframes shimmerSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes rotateBorder {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes beamSweep {
+  0%   { left: -60%; }
+  100% { left: 120%; }
+}
+
+/* ─── Utility classes ──────────────────────────────────────────── */
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: beamSweep 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.animated-border-card {
+  position: relative;
+}
+.animated-border-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(100,149,237,0.6) 60deg,
+    rgba(52,211,153,0.4) 120deg,
+    transparent 180deg,
+    transparent 360deg
+  );
+  animation: rotateBorder 4s linear infinite;
+  z-index: -1;
+}
+.animated-border-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--surface-1);
+  z-index: -1;
+}
+
+.beam-progress {
+  position: relative;
+  overflow: hidden;
+}
+.beam-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: beamSweep 1.8s ease-in-out infinite;
+}
