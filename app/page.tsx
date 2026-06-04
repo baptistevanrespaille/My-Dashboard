@@ -1,101 +1,83 @@
-import Image from "next/image";
+import { prisma } from "@/lib/prisma";
+import DashboardClient from "./_components/DashboardClient";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+async function getDashboardData() {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); thirtyDaysAgo.setHours(0, 0, 0, 0);
+  const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); sevenDaysAgo.setHours(0, 0, 0, 0);
+  const sevenDaysAgoFinance = new Date(); sevenDaysAgoFinance.setDate(sevenDaysAgoFinance.getDate() - 7); sevenDaysAgoFinance.setHours(0, 0, 0, 0);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+  const [latestWeight, todayNutrition, latestSleep, nextTask, weightHistory, caloriesHistory, recentWorkouts, latestFinance, financeWeekAgo] =
+    await Promise.all([
+      prisma.bodyMetric.findFirst({ orderBy: { date: "desc" } }),
+      prisma.nutritionLog.findFirst({ where: { date: today } }),
+      prisma.sleepLog.findFirst({ orderBy: { date: "desc" } }),
+      prisma.task.findFirst({ where: { scope: "DAY", completed: false }, orderBy: { priority: "desc" } }),
+      prisma.bodyMetric.findMany({ where: { date: { gte: thirtyDaysAgo } }, orderBy: { date: "asc" } }),
+      prisma.nutritionLog.findMany({ where: { date: { gte: sevenDaysAgo } }, orderBy: { date: "asc" } }),
+      prisma.workoutSession.findMany({
+        where: { date: { gte: new Date(Date.now() - 35 * 86400000) } },
+        orderBy: { date: "desc" },
+        include: { cardioLog: true, exercises: true },
+        take: 30,
+      }),
+      prisma.financeSnapshot.findFirst({ orderBy: { date: "desc" } }),
+      prisma.financeSnapshot.findFirst({ where: { date: { lte: sevenDaysAgoFinance } }, orderBy: { date: "desc" } }),
+    ]);
+
+  // Streak calcul
+  let streak = 0;
+  const workoutDates = new Set(recentWorkouts.map((w) => w.date.toISOString().split("T")[0]));
+  for (let i = 0; i <= 35; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().split("T")[0];
+    if (workoutDates.has(key)) streak++;
+    else if (i > 0) break;
+  }
+
+  // Dernière session
+  const lastSession = recentWorkouts[0] ?? null;
+
+  // Moyenne mobile 7j poids
+  const wHistory = weightHistory.map((w) => ({ date: w.date.toISOString().split("T")[0], weight: Number(w.weight) }));
+  const with7jMA = wHistory.map((_, i) => {
+    const slice = wHistory.slice(Math.max(0, i - 6), i + 1);
+    const ma = slice.reduce((s, d) => s + d.weight, 0) / slice.length;
+    return { ...wHistory[i], ma: parseFloat(ma.toFixed(2)) };
+  });
+
+  return {
+    latestWeight: latestWeight ? { date: latestWeight.date.toISOString(), weight: Number(latestWeight.weight) } : null,
+    todayNutrition: todayNutrition ? { calories: todayNutrition.calories } : null,
+    latestSleep: latestSleep ? { duration: Number(latestSleep.duration), quality: latestSleep.quality } : null,
+    nextTask: nextTask ? { title: nextTask.title, priority: nextTask.priority } : null,
+    workoutStreak: streak,
+    lastSession: lastSession ? {
+      date: lastSession.date.toISOString().split("T")[0],
+      type: lastSession.type,
+      sessionLabel: lastSession.sessionLabel,
+      duration: lastSession.duration,
+      distanceKm: lastSession.cardioLog?.distanceKm ? Number(lastSession.cardioLog.distanceKm) : null,
+      volume: lastSession.exercises.reduce((total, ex) => {
+        const sets = (ex.sets as any[]);
+        return total + sets.reduce((s: number, set: any) => s + (set.reps ?? 0) * (set.weightKg ?? 0), 0);
+      }, 0),
+    } : null,
+    finance: latestFinance ? {
+      bankBalance: Number(latestFinance.bankBalance),
+      totalValue: Number(latestFinance.totalValue),
+      total: Number(latestFinance.bankBalance) + Number(latestFinance.totalValue),
+      variation7j: financeWeekAgo
+        ? (Number(latestFinance.bankBalance) + Number(latestFinance.totalValue)) -
+          (Number(financeWeekAgo.bankBalance) + Number(financeWeekAgo.totalValue))
+        : null,
+    } : null,
+    weightHistory: with7jMA,
+    caloriesHistory: caloriesHistory.map((c) => ({ date: c.date.toISOString().split("T")[0], calories: c.calories })),
+  };
+}
+
+export default async function DashboardPage() {
+  const data = await getDashboardData();
+  return <DashboardClient data={data} />;
 }

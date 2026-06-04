@@ -1,27 +1,92 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
+    /* Cornflower Blue #6495ED → HSL 219 79% 67% */
+    --primary: 219 79% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 85%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 219 79% 67%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 12%;
+    --ring: 219 79% 67%;
+    --radius: 0.75rem;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * { @apply border-border; }
+  html { color-scheme: dark; }
+  body {
+    background-color: #0F0F0F;
+    color: #f2f2f2;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* Safe area iPhone */
+  .pb-nav {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer components {
+  .input-dark {
+    background-color: #111111;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f0f0f0;
+    border-radius: 0.75rem;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    font-size: 1rem; /* ≥16px pour éviter zoom iOS */
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
   }
+  .input-dark::placeholder { color: #555; }
+  .input-dark:focus {
+    border-color: #6495ED;
+    box-shadow: 0 0 0 1px rgba(100,149,237,0.3);
+  }
+
+  .card-dark {
+    background-color: #1A1A1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 1rem;
+  }
+
+  /* Skeleton animation */
+  .skeleton {
+    background: linear-gradient(90deg, #1A1A1A 25%, #222 50%, #1A1A1A 75%);
+    background-size: 200% 100%;
+    animation: skeleton-wave 1.5s infinite;
+    border-radius: 0.5rem;
+  }
+  @keyframes skeleton-wave {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Tab transitions */
+  [data-state="active"] { transition: all 0.15s ease; }
 }

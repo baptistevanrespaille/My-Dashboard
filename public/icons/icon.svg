@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0F0F0F"/>
+  <!-- M letter -->
+  <path d="M100 160 L100 352 L150 352 L150 232 L213 320 L256 320 L320 232 L320 352 L370 352 L370 160 L310 160 L235 272 L162 160 Z" fill="#6495ED"/>
+  <!-- Underline / dashboard line -->
+  <rect x="100" y="370" width="312" height="14" rx="7" fill="#6495ED" opacity="0.4"/>
+</svg>

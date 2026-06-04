@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum WorkoutType {
+  STRENGTH
+  RUNNING
+  OTHER
+}
+
+enum TaskScope {
+  DAY
+  WEEK
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model BodyMetric {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  weight    Decimal  @db.Decimal(5, 2)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([date])
+  @@map("body_metrics")
+}
+
+model NutritionLog {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  calories  Int
+  protein   Decimal  @db.Decimal(6, 1)
+  carbs     Decimal  @db.Decimal(6, 1)
+  fat       Decimal  @db.Decimal(6, 1)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([date])
+  @@map("nutrition_logs")
+}
+
+model SleepLog {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  bedtime   DateTime @db.Time()
+  wakeTime  DateTime @db.Time()
+  duration  Decimal  @db.Decimal(4, 2)
+  quality   Int
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([date])
+  @@map("sleep_logs")
+}
+
+model WorkoutSession {
+  id           String            @id @default(cuid())
+  date         DateTime          @db.Date
+  type         WorkoutType
+  sessionLabel String?
+  duration     Int
+  notes        String?
+  createdAt    DateTime          @default(now())
+  exercises    WorkoutExercise[]
+  cardioLog    CardioLog?
+
+  @@map("workout_sessions")
+}
+
+model WorkoutExercise {
+  id               String         @id @default(cuid())
+  workoutSession   WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  workoutSessionId String
+  exerciseName     String
+  sets             Json
+  notes            String?
+
+  @@map("workout_exercises")
+}
+
+model CardioLog {
+  id               String         @id @default(cuid())
+  workoutSession   WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  workoutSessionId String         @unique
+  distanceKm       Decimal?       @db.Decimal(5, 2)
+  avgPaceMinPerKm  Decimal?       @db.Decimal(4, 2)
+  avgHeartRate     Int?
+  route            String?
+  notes            String?
+
+  @@map("cardio_logs")
+}
+
+model FinanceSnapshot {
+  id            String   @id @default(cuid())
+  date          DateTime @db.Date
+  bankBalance   Decimal  @db.Decimal(10, 2)
+  totalInvested Decimal  @db.Decimal(10, 2)
+  totalValue    Decimal  @db.Decimal(10, 2)
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@unique([date])
+  @@map("finance_snapshots")
+}
+
+model Investment {
+  id           String   @id @default(cuid())
+  ticker       String   @unique
+  name         String
+  type         String
+  quantity     Decimal  @db.Decimal(10, 4)
+  avgBuyPrice  Decimal  @db.Decimal(10, 2)
+  currentPrice Decimal  @db.Decimal(10, 2)
+  lastUpdated  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@map("investments")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?    @db.Date
+  scope       TaskScope
+  completed   Boolean      @default(false)
+  completedAt DateTime?
+  priority    TaskPriority @default(MEDIUM)
+  createdAt   DateTime     @default(now())
+
+  @@map("tasks")
+}
