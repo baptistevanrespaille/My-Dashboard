@@ -6,18 +6,22 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Plus, Trash2, CheckCircle2, Circle } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PageHeader from "@/components/PageHeader";
-import { cn } from "@/lib/utils";
-// canvas-confetti chargé dynamiquement pour éviter l'erreur SSR
+import { Plus, Trash2, CheckCircle2, Circle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
 let confetti: any = null;
 if (typeof window !== "undefined") {
   import("canvas-confetti").then((m) => { confetti = m.default; });
 }
+
+const ACCENT  = "#00E5FF";
+const GOLD    = "#C9A84C";
+const SUCCESS = "#00E676";
+const DANGER  = "#FF3D57";
+const WARNING = "#FFB300";
+const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type Task = {
   id: string; title: string; scope: string; priority: string;
@@ -30,18 +34,72 @@ const schema = z.object({
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
 });
 
-const PRIORITY: Record<string, { label: string; color: string; dot: string; badge: string }> = {
-  HIGH:   { label: "Haute",   color: "text-red-400",     dot: "bg-red-400",     badge: "bg-red-500/15 text-red-300" },
-  MEDIUM: { label: "Moyenne", color: "text-amber-400",   dot: "bg-amber-400",   badge: "bg-amber-500/15 text-amber-300" },
-  LOW:    { label: "Basse",   color: "text-emerald-400", dot: "bg-emerald-400", badge: "bg-emerald-500/15 text-emerald-300" },
+const PRIORITY: Record<string, { label: string; color: string; indicator: string; bg: string }> = {
+  HIGH:   { label: "HAUTE",   color: DANGER,  indicator: DANGER,  bg: `${DANGER}15`  },
+  MEDIUM: { label: "MOY.",    color: WARNING, indicator: WARNING, bg: `${WARNING}15` },
+  LOW:    { label: "BASSE",   color: "rgba(240,238,232,0.3)", indicator: "rgba(240,238,232,0.12)", bg: "rgba(255,255,255,0.04)" },
 };
+
+function SegControl({ value, onChange, tabs }: { value: string; onChange: (v: string) => void; tabs: { key: string; label: string }[] }) {
+  return (
+    <div style={{ display: "flex", background: "var(--surface-2)", borderRadius: 14, padding: 4 }}>
+      {tabs.map((t) => {
+        const active = t.key === value;
+        return (
+          <button key={t.key} onClick={() => onChange(t.key)} style={{
+            flex: 1, padding: "10px 4px", borderRadius: 10, fontSize: 11,
+            fontWeight: 700, letterSpacing: "0.08em", border: "none", cursor: "pointer",
+            fontFamily: "var(--font-sans)", minHeight: 40,
+            background: active ? ACCENT : "transparent",
+            color: active ? "#050508" : "rgba(240,238,232,0.3)",
+            boxShadow: active ? `0 0 12px ${ACCENT}40` : "none",
+            transition: "all 0.22s cubic-bezier(0.32,0.72,0,1)",
+          }}>{t.label}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ProgressCircle({ done, total }: { done: number; total: number }) {
+  const pct = total > 0 ? done / total : 0;
+  const r = 27;
+  const circ = 2 * Math.PI * r;
+  const isComplete = total > 0 && done === total;
+  const strokeColor = isComplete ? GOLD : ACCENT;
+
+  return (
+    <div style={{ position: "relative", width: 64, height: 64, flexShrink: 0 }}>
+      <svg width={64} height={64} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={32} cy={32} r={r} stroke="var(--surface-3)" strokeWidth={4} fill="none" />
+        <motion.circle
+          cx={32} cy={32} r={r}
+          stroke={strokeColor} strokeWidth={4} fill="none"
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          initial={{ strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: circ * (1 - pct) }}
+          transition={{ duration: 1, ease: [0.32, 0.72, 0, 1], delay: 0.2 }}
+          style={{ filter: `drop-shadow(0 0 6px ${strokeColor}80)` }}
+        />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: strokeColor, lineHeight: 1 }}>
+          {done}/{total}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const [filter, setFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
+  const [tab, setTab] = useState("day");
+  const [addOpen, setAddOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [celebrationVisible, setCelebrationVisible] = useState(false);
 
   const { register, handleSubmit, reset, setValue } = useForm({
     resolver: zodResolver(schema),
@@ -52,19 +110,18 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
   const weekTasks = initialTasks.filter((t) => t.scope === "WEEK");
   const allDayDone = dayTasks.length > 0 && dayTasks.every((t) => t.completed);
 
-  // Confetti quand toutes les tâches du jour sont complétées
   useEffect(() => {
     if (allDayDone) {
-      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ["#6495ED", "#10b981", "#f97316", "#f0f0f0"] });
+      confetti?.({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: [ACCENT, GOLD, SUCCESS, "#fff"] });
+      setCelebrationVisible(true);
+      const t = setTimeout(() => setCelebrationVisible(false), 3000);
+      return () => clearTimeout(t);
     }
   }, [allDayDone]);
 
   async function onSubmit(values: any) {
-    const res = await fetch("/api/tasks", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...values, dueDate: new Date().toISOString().split("T")[0] }),
-    });
-    if (res.ok) { toast.success("Tâche ajoutée !"); reset(); startTransition(() => router.refresh()); }
+    const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, dueDate: new Date().toISOString().split("T")[0] }) });
+    if (res.ok) { toast.success("Tâche ajoutée !"); reset(); setAddOpen(false); startTransition(() => router.refresh()); }
     else toast.error("Erreur");
   }
 
@@ -86,147 +143,273 @@ export default function TachesClient({ tasks: initialTasks }: { tasks: Task[] })
     startTransition(() => router.refresh());
   }
 
-  const filterTask = (t: Task) => filter === "ALL" || t.priority === filter;
+  const tasks = tab === "day" ? dayTasks : weekTasks;
+  const doneTasks = tasks.filter((t) => t.completed);
+  const todoTasks = tasks.filter((t) => !t.completed);
 
   return (
-    <div className="px-4 space-y-4">
-      <PageHeader title="Tâches" subtitle="Aujourd'hui & cette semaine" />
+    <div style={{ padding: "0 20px 20px" }}>
 
-      {/* Formulaire rapide */}
-      <form onSubmit={handleSubmit(onSubmit)} className="card-dark p-4 space-y-3">
-        <Input {...register("title")} placeholder="Nouvelle tâche…" className="input-dark text-base" />
-        <div className="flex gap-2">
-          <Select defaultValue="DAY" onValueChange={(v) => setValue("scope", v as any)}>
-            <SelectTrigger className="input-dark flex-1 h-10 text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-              <SelectItem value="DAY" className="text-sm">Aujourd'hui</SelectItem>
-              <SelectItem value="WEEK" className="text-sm">Cette semaine</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select defaultValue="MEDIUM" onValueChange={(v) => setValue("priority", v as any)}>
-            <SelectTrigger className="input-dark flex-1 h-10 text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-              <SelectItem value="HIGH" className="text-sm text-red-300">🔴 Haute</SelectItem>
-              <SelectItem value="MEDIUM" className="text-sm text-amber-300">🟡 Moyenne</SelectItem>
-              <SelectItem value="LOW" className="text-sm text-emerald-300">🟢 Basse</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button type="submit" size="icon" className="bg-[#6495ED] hover:bg-[#4a7de8] rounded-xl h-10 w-10 flex-shrink-0">
-            <Plus size={16} />
-          </Button>
+      {/* CELEBRATION OVERLAY */}
+      <AnimatePresence>
+        {celebrationVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, pointerEvents: "none" }}
+          >
+            <motion.p
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              style={{ fontFamily: "var(--font-display)", fontSize: 40, color: GOLD, letterSpacing: "0.05em", textShadow: `0 0 40px ${GOLD}` }}
+            >
+              TOUT ACCOMPLI
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* HEADER */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>TÂCHES</h1>
+            <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6, fontFamily: "var(--font-mono)" }}>
+              {format(new Date(), "d MMMM yyyy", { locale: fr }).toUpperCase()}
+            </p>
+          </div>
+          <ProgressCircle done={doneTasks.length} total={tasks.length} />
         </div>
-      </form>
+        <div style={{ height: 1, marginTop: 16, background: `linear-gradient(90deg, transparent, ${ACCENT}33, transparent)` }} />
+      </motion.div>
 
-      {/* Filtre priorité */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {(["ALL", "HIGH", "MEDIUM", "LOW"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)}
-            className={cn("flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-colors",
-              filter === f ? "bg-[#6495ED] text-white" : "bg-white/5 text-zinc-400 hover:bg-white/10")}>
-            {f === "ALL" ? "Toutes" : PRIORITY[f].label}
-          </button>
-        ))}
-      </div>
+      {/* TABS */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} style={{ marginBottom: 20 }}>
+        <SegControl
+          value={tab} onChange={setTab}
+          tabs={[
+            { key: "day", label: "AUJOURD'HUI" },
+            { key: "week", label: "CETTE SEMAINE" },
+          ]}
+        />
+      </motion.div>
 
-      <Tabs defaultValue="day">
-        <TabsList className="w-full bg-[#1A1A1A] border border-white/[0.08] rounded-xl p-1 h-10">
-          <TabsTrigger value="day" className="flex-1 rounded-lg text-xs data-[state=active]:bg-[#6495ED] data-[state=active]:text-white text-zinc-400">
-            Aujourd'hui <span className="ml-1 opacity-60">{dayTasks.filter(t=>!t.completed).length}/{dayTasks.length}</span>
-          </TabsTrigger>
-          <TabsTrigger value="week" className="flex-1 rounded-lg text-xs data-[state=active]:bg-[#6495ED] data-[state=active]:text-white text-zinc-400">
-            Semaine <span className="ml-1 opacity-60">{weekTasks.filter(t=>!t.completed).length}/{weekTasks.length}</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* TASK LISTS */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+          style={{ display: "flex", flexDirection: "column", gap: 8 }}
+        >
+          {/* All done celebration */}
+          {allDayDone && tab === "day" && tasks.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{ background: `${SUCCESS}12`, border: `1px solid ${SUCCESS}30`, borderRadius: 20, padding: 20, textAlign: "center" }}
+            >
+              <p style={{ fontFamily: "var(--font-display)", fontSize: 24, letterSpacing: "0.05em", color: SUCCESS }}>TOUT ACCOMPLI 🎉</p>
+              <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 4 }}>Excellent travail, Baptiste !</p>
+            </motion.div>
+          )}
 
-        <TabsContent value="day" className="mt-3 space-y-2">
-          {allDayDone && dayTasks.length > 0 && (
-            <div className="card-dark p-4 text-center border border-emerald-500/30">
-              <p className="text-xl mb-1">🎉</p>
-              <p className="text-sm font-semibold text-emerald-400">Toutes les tâches du jour sont complétées !</p>
-              <p className="text-xs text-zinc-500 mt-0.5">Excellent travail, Baptiste !</p>
+          {/* To-do */}
+          {todoTasks.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {todoTasks.map((task, i) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  index={i}
+                  onToggle={() => toggleTask(task.id, task.completed)}
+                  onDelete={() => deleteTask(task.id)}
+                  editingId={editingId}
+                  setEditingId={setEditingId}
+                  editValue={editValue}
+                  setEditValue={setEditValue}
+                  onSaveEdit={saveEdit}
+                />
+              ))}
             </div>
           )}
-          <ProgressBar tasks={dayTasks} />
-          <TaskList tasks={dayTasks.filter(filterTask)} onToggle={toggleTask} onDelete={deleteTask}
-            editingId={editingId} setEditingId={setEditingId} editValue={editValue} setEditValue={setEditValue} onSaveEdit={saveEdit} />
-        </TabsContent>
 
-        <TabsContent value="week" className="mt-3 space-y-2">
-          <ProgressBar tasks={weekTasks} />
-          <TaskList tasks={weekTasks.filter(filterTask)} onToggle={toggleTask} onDelete={deleteTask}
-            editingId={editingId} setEditingId={setEditingId} editValue={editValue} setEditValue={setEditValue} onSaveEdit={saveEdit} />
-        </TabsContent>
-      </Tabs>
+          {/* Completed section */}
+          {doneTasks.length > 0 && (
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(240,238,232,0.2)", margin: "12px 0 8px" }}>
+                COMPLÉTÉES · {doneTasks.length}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {doneTasks.map((task, i) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    index={i}
+                    onToggle={() => toggleTask(task.id, task.completed)}
+                    onDelete={() => deleteTask(task.id)}
+                    editingId={editingId}
+                    setEditingId={setEditingId}
+                    editValue={editValue}
+                    setEditValue={setEditValue}
+                    onSaveEdit={saveEdit}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tasks.length === 0 && (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <CheckCircle2 size={36} style={{ color: "rgba(240,238,232,0.12)", display: "block", margin: "0 auto 12px" }} />
+              <p style={{ color: "rgba(240,238,232,0.25)", fontSize: 14 }}>Aucune tâche ici</p>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* ADD BUTTON */}
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setAddOpen(true)}
+        className="shimmer-btn"
+        style={{
+          display: "flex", alignItems: "center", gap: 8,
+          marginTop: 20,
+          background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`,
+          color: "#050508", borderRadius: 14, height: 52,
+          width: "100%", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em",
+          border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
+          justifyContent: "center",
+          boxShadow: `0 4px 24px ${ACCENT}25`,
+        }}
+      >
+        <Plus size={16} strokeWidth={2.5} /> NOUVELLE TÂCHE
+      </motion.button>
+
+      {/* ADD SHEET */}
+      <AnimatePresence>
+        {addOpen && (
+          <>
+            <motion.div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAddOpen(false)} />
+            <motion.div className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto" style={{ background: "rgba(5,5,8,0.97)", borderRadius: "24px 24px 0 0", border: `1px solid ${ACCENT}12`, borderBottom: "none", backdropFilter: "blur(30px)", paddingBottom: "env(safe-area-inset-bottom)" }} initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={SPRING}>
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(240,238,232,0.15)", margin: "12px auto 0" }} />
+              <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--text-primary)", letterSpacing: "0.05em" }}>NOUVELLE TÂCHE</span>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setAddOpen(false)} style={{ color: "rgba(240,238,232,0.4)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}><X size={18} /></motion.button>
+              </div>
+              <form onSubmit={handleSubmit(onSubmit)} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ borderBottom: `1px solid ${ACCENT}35`, paddingBottom: 8 }}>
+                  <input {...register("title")} autoFocus placeholder="Titre de la tâche…" style={{ background: "none", border: "none", outline: "none", color: "var(--text-primary)", fontSize: 16, width: "100%", fontFamily: "var(--font-sans)" }} />
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {(["DAY", "WEEK"] as const).map((s) => (
+                    <motion.button key={s} type="button" whileTap={{ scale: 0.95 }} onClick={() => setValue("scope", s)} style={{
+                      flex: 1, padding: "9px 4px", borderRadius: 10, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                      border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer", fontFamily: "var(--font-sans)", minHeight: 40,
+                      background: "var(--surface-3)", color: "rgba(240,238,232,0.5)",
+                    }}>
+                      {s === "DAY" ? "AUJOURD'HUI" : "SEMAINE"}
+                    </motion.button>
+                  ))}
+                </div>
+                {/* Priority */}
+                <div style={{ display: "flex", gap: 8 }}>
+                  {(["HIGH", "MEDIUM", "LOW"] as const).map((p) => {
+                    const s = PRIORITY[p];
+                    return (
+                      <motion.button key={p} type="button" whileTap={{ scale: 0.95 }} onClick={() => setValue("priority", p)} style={{
+                        flex: 1, padding: "9px 4px", borderRadius: 10, fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
+                        background: s.bg, color: s.color, border: `1px solid ${s.indicator}40`,
+                        cursor: "pointer", fontFamily: "var(--font-sans)", minHeight: 40,
+                        transition: "all 0.18s cubic-bezier(0.32,0.72,0,1)",
+                      }}>
+                        {s.label}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                <motion.button type="submit" whileTap={{ scale: 0.97 }} className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 50, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                  AJOUTER
+                </motion.button>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function ProgressBar({ tasks }: { tasks: Task[] }) {
-  const done = tasks.filter((t) => t.completed).length;
-  const total = tasks.length;
-  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-  return (
-    <div className="card-dark p-3">
-      <div className="flex justify-between mb-1.5">
-        <span className="text-xs text-zinc-400">{done}/{total} complétées</span>
-        <span className="text-xs font-bold text-[#6495ED]">{pct}%</span>
-      </div>
-      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-        <div className="h-full bg-[#6495ED] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
-
-function TaskList({ tasks, onToggle, onDelete, editingId, setEditingId, editValue, setEditValue, onSaveEdit }: {
-  tasks: Task[]; onToggle: (id: string, completed: boolean) => void; onDelete: (id: string) => void;
+function TaskCard({ task, index, onToggle, onDelete, editingId, setEditingId, editValue, setEditValue, onSaveEdit }: {
+  task: Task; index: number;
+  onToggle: () => void; onDelete: () => void;
   editingId: string | null; setEditingId: (id: string | null) => void;
-  editValue: string; setEditValue: (v: string) => void; onSaveEdit: (id: string) => void;
+  editValue: string; setEditValue: (v: string) => void;
+  onSaveEdit: (id: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { if (editingId) inputRef.current?.focus(); }, [editingId]);
-
-  if (tasks.length === 0) return (
-    <div className="card-dark p-8 text-center">
-      <CheckCircle2 size={28} className="text-zinc-700 mx-auto mb-2" />
-      <p className="text-zinc-600 text-sm">Aucune tâche ici</p>
-    </div>
-  );
-
-  const todo = tasks.filter((t) => !t.completed);
-  const done = tasks.filter((t) => t.completed);
+  useEffect(() => { if (editingId === task.id) inputRef.current?.focus(); }, [editingId, task.id]);
+  const p = PRIORITY[task.priority];
 
   return (
-    <div className="space-y-1.5">
-      {[...todo, ...done].map((task) => {
-        const p = PRIORITY[task.priority];
-        return (
-          <div key={task.id} className={cn("flex items-center gap-3 card-dark px-3 py-3 transition-opacity", task.completed && "opacity-45")}>
-            <button onClick={() => onToggle(task.id, task.completed)} className="flex-shrink-0">
-              {task.completed ? <CheckCircle2 size={20} className="text-[#6495ED]" /> : <Circle size={20} className="text-zinc-600" />}
-            </button>
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: task.completed ? 0.4 : 1, x: 0 }}
+      transition={{ type: "spring", stiffness: 380, damping: 35, delay: index * 0.04 }}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        background: "rgba(255,255,255,0.02)",
+        border: "1px solid rgba(255,255,255,0.05)",
+        borderRadius: 16, padding: "13px 14px",
+        position: "relative", overflow: "hidden",
+      }}
+    >
+      {/* Left indicator */}
+      <div style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: 3, height: 22, borderRadius: "0 2px 2px 0", background: p.indicator }} />
 
-            <div className="flex-1 min-w-0">
-              {editingId === task.id ? (
-                <input ref={inputRef} value={editValue} onChange={(e) => setEditValue(e.target.value)}
-                  onBlur={() => onSaveEdit(task.id)}
-                  onKeyDown={(e) => { if (e.key === "Enter") onSaveEdit(task.id); if (e.key === "Escape") setEditingId(null); }}
-                  className="w-full bg-transparent text-sm text-white outline-none border-b border-[#6495ED]" />
-              ) : (
-                <p onDoubleClick={() => { setEditingId(task.id); setEditValue(task.title); }}
-                  className={cn("text-sm font-medium text-white truncate cursor-text", task.completed && "line-through text-zinc-500")}>
-                  {task.title}
-                </p>
-              )}
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${p.badge}`}>{p.label}</span>
-            </div>
+      {/* Checkbox */}
+      <motion.button whileTap={{ scale: 0.8 }} onClick={onToggle} style={{ flexShrink: 0, marginLeft: 4, background: "none", border: "none", cursor: "pointer", minWidth: 28, minHeight: 28 }}>
+        {task.completed
+          ? <CheckCircle2 size={22} style={{ color: ACCENT }} />
+          : <Circle size={22} style={{ color: `${ACCENT}55` }} />}
+      </motion.button>
 
-            <button onClick={() => onDelete(task.id)} className="text-zinc-700 hover:text-red-400 transition-colors p-1 flex-shrink-0">
-              <Trash2 size={14} />
-            </button>
-          </div>
-        );
-      })}
-    </div>
+      {/* Title */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {editingId === task.id ? (
+          <input
+            ref={inputRef}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={() => onSaveEdit(task.id)}
+            onKeyDown={(e) => { if (e.key === "Enter") onSaveEdit(task.id); if (e.key === "Escape") setEditingId(null); }}
+            style={{ background: "none", border: "none", outline: "none", borderBottom: `1px solid ${ACCENT}`, color: "var(--text-primary)", fontSize: 14, fontFamily: "var(--font-sans)", width: "100%", paddingBottom: 2 }}
+          />
+        ) : (
+          <p
+            onDoubleClick={() => { setEditingId(task.id); setEditValue(task.title); }}
+            style={{ fontSize: 14, fontWeight: 500, color: task.completed ? "rgba(240,238,232,0.3)" : "var(--text-primary)", textDecoration: task.completed ? "line-through" : "none", transition: "all 0.25s", cursor: "text" }}
+          >
+            {task.title}
+          </p>
+        )}
+      </div>
+
+      {/* Priority badge */}
+      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", background: p.bg, color: p.color, padding: "3px 7px", borderRadius: 6, flexShrink: 0 }}>
+        {p.label}
+      </span>
+
+      {/* Delete */}
+      <motion.button whileTap={{ scale: 0.8 }} onClick={onDelete} style={{ color: "rgba(240,238,232,0.18)", flexShrink: 0, background: "none", border: "none", cursor: "pointer", minWidth: 28, minHeight: 28 }}>
+        <Trash2 size={13} />
+      </motion.button>
+    </motion.div>
   );
 }

@@ -1,20 +1,35 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Bebas_Neue, JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import AmbientBackground from "@/components/AmbientBackground";
 import PageTransitionWrapper from "@/components/PageTransitionWrapper";
 import { Toaster } from "sonner";
 
-const geist = localFont({
-  src: "./fonts/GeistVF.woff",
+const inter = Inter({
+  subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500", "700"],
+});
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-mono",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -40,13 +55,13 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#080810",
+  themeColor: "#050508",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${geist.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased" style={{ background: "#080810", color: "#fff" }}>
+    <html lang="fr" className={`${inter.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} ${geistMono.variable}`}>
+      <body className="font-sans antialiased" style={{ background: "#050508", color: "#F0EEE8" }}>
         <AmbientBackground />
         <main className="pb-nav min-h-screen max-w-lg mx-auto relative z-10">
           <PageTransitionWrapper>{children}</PageTransitionWrapper>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -10,13 +10,19 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Upload } from "lucide-react";
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine,
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import PageHeader from "@/components/PageHeader";
+import { motion, AnimatePresence } from "framer-motion";
+import FlipNumber from "@/components/FlipNumber";
+import PulsingGlow from "@/components/PulsingGlow";
+
+const ACCENT  = "#00E5FF";
+const GOLD    = "#C9A84C";
+const SUCCESS = "#00E676";
+const DANGER  = "#FF3D57";
+const WARNING = "#FFB300";
+const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 type SanteData = {
   weights: { date: string; weight: number }[];
@@ -24,9 +30,6 @@ type SanteData = {
   sleep: { date: string; duration: number; quality: number; bedtime: string; wakeTime: string }[];
 };
 
-const ACCENT = "#6495ED";
-
-// ─── Schémas ──────────────────────────────────────────────────────────────────
 const weightSchema = z.object({ date: z.string(), weight: z.coerce.number().min(20).max(300) });
 const nutritionSchema = z.object({
   date: z.string(), calories: z.coerce.number().int().min(0).max(10000),
@@ -36,41 +39,141 @@ const sleepSchema = z.object({
   date: z.string(), bedtime: z.string().regex(/^\d{2}:\d{2}$/), wakeTime: z.string().regex(/^\d{2}:\d{2}$/),
 });
 
-export default function SanteClient({ data }: { data: SanteData }) {
-  const router = useRouter();
+// Segmented control tabs
+function SegControl({ value, onChange, tabs }: {
+  value: string; onChange: (v: string) => void;
+  tabs: { key: string; label: string }[];
+}) {
   return (
-    <div className="px-4 space-y-4">
-      <PageHeader title="Santé" subtitle="Poids · Calories · Sommeil" />
-      <Tabs defaultValue="poids">
-        <TabsList className="w-full bg-[#1A1A1A] border border-white/[0.08] rounded-xl p-1 h-10">
-          {["poids", "calories", "sommeil"].map((v) => (
-            <TabsTrigger key={v} value={v} className="flex-1 rounded-lg text-xs capitalize data-[state=active]:bg-[#6495ED] data-[state=active]:text-white text-zinc-400">
-              {v.charAt(0).toUpperCase() + v.slice(1)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <TabsContent value="poids" className="mt-4 space-y-4">
-          <WeightTab data={data.weights} onSuccess={() => router.refresh()} />
-        </TabsContent>
-        <TabsContent value="calories" className="mt-4 space-y-4">
-          <CaloriesTab data={data.nutrition} onSuccess={() => router.refresh()} />
-        </TabsContent>
-        <TabsContent value="sommeil" className="mt-4 space-y-4">
-          <SleepTab data={data.sleep} onSuccess={() => router.refresh()} />
-        </TabsContent>
-      </Tabs>
+    <div style={{ display: "flex", background: "var(--surface-2)", borderRadius: 14, padding: 4, position: "relative" }}>
+      {tabs.map((t) => {
+        const active = t.key === value;
+        return (
+          <button key={t.key} onClick={() => onChange(t.key)} style={{
+            flex: 1, padding: "10px 4px", borderRadius: 10, fontSize: 11,
+            fontWeight: 700, letterSpacing: "0.08em", border: "none", cursor: "pointer",
+            fontFamily: "var(--font-sans)", minHeight: 40, position: "relative", zIndex: 1,
+            background: active ? ACCENT : "transparent",
+            color: active ? "#050508" : "rgba(240,238,232,0.3)",
+            boxShadow: active ? `0 0 12px ${ACCENT}40` : "none",
+            transition: "all 0.22s cubic-bezier(0.32,0.72,0,1)",
+          }}>
+            {t.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-// ── Onglet Poids ──────────────────────────────────────────────────────────────
+// Beam progress
+function BeamProg({ value, max, color = ACCENT }: { value: number; max: number; color?: string }) {
+  const [w, setW] = useState(0);
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  useEffect(() => { const t = setTimeout(() => setW(pct), 150); return () => clearTimeout(t); }, [pct]);
+  return (
+    <div style={{ background: "var(--surface-3)", borderRadius: 999, height: 4, overflow: "hidden" }}>
+      <div className="beam-progress" style={{
+        height: "100%", borderRadius: 999, width: `${w}%`,
+        background: `linear-gradient(90deg, ${color}88, ${color})`,
+        boxShadow: `0 0 8px ${color}50`,
+        transition: "width 1.2s cubic-bezier(0.32,0.72,0,1)",
+      }} />
+    </div>
+  );
+}
+
+// Chart tooltip
+function Tip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "rgba(12,12,18,0.97)", border: `1px solid ${ACCENT}35`, borderRadius: 10, padding: "8px 12px", backdropFilter: "blur(8px)" }}>
+      <p style={{ fontSize: 10, color: "rgba(240,238,232,0.4)", marginBottom: 4 }}>{label}</p>
+      {payload.map((p: any) => (
+        <p key={p.dataKey} style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
+          {p.value} {p.name}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+export default function SanteClient({ data }: { data: SanteData }) {
+  const [tab, setTab] = useState("poids");
+  const router = useRouter();
+
+  // Global health score (simple moyenne)
+  const latestWeight = data.weights[data.weights.length - 1]?.weight;
+  const latestSleep = data.sleep[data.sleep.length - 1];
+  const latestNutrition = data.nutrition[data.nutrition.length - 1];
+  const sleepScore = latestSleep ? Math.min(100, Math.round((latestSleep.duration / 8) * 100)) : 0;
+  const calScore = latestNutrition ? Math.min(100, Math.round((latestNutrition.calories / 2500) * 100)) : 0;
+  const globalScore = Math.round((sleepScore + calScore) / 2);
+  const scoreColor = globalScore >= 80 ? SUCCESS : globalScore >= 60 ? WARNING : DANGER;
+
+  return (
+    <div style={{ padding: "0 20px 20px" }}>
+
+      {/* HEADER */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SANTÉ</h1>
+            <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6 }}>Poids · Calories · Sommeil</p>
+          </div>
+          {/* Score circle SVG */}
+          <div style={{ position: "relative", width: 64, height: 64, marginTop: 4 }}>
+            <svg width={64} height={64} style={{ transform: "rotate(-90deg)" }}>
+              <circle cx={32} cy={32} r={27} stroke="var(--surface-3)" strokeWidth={4} fill="none" />
+              <motion.circle
+                cx={32} cy={32} r={27}
+                stroke={scoreColor} strokeWidth={4} fill="none"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 27}
+                initial={{ strokeDashoffset: 2 * Math.PI * 27 }}
+                animate={{ strokeDashoffset: 2 * Math.PI * 27 * (1 - globalScore / 100) }}
+                transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1], delay: 0.3 }}
+                style={{ filter: `drop-shadow(0 0 6px ${scoreColor}80)` }}
+              />
+            </svg>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>{globalScore}</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ height: 1, marginTop: 16, background: `linear-gradient(90deg, transparent, ${ACCENT}33, transparent)` }} />
+      </motion.div>
+
+      {/* SEGMENTED TABS */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }} style={{ marginBottom: 20 }}>
+        <SegControl
+          value={tab} onChange={setTab}
+          tabs={[{ key: "poids", label: "POIDS" }, { key: "calories", label: "CALORIES" }, { key: "sommeil", label: "SOMMEIL" }]}
+        />
+      </motion.div>
+
+      {/* TAB CONTENT */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+        >
+          {tab === "poids" && <WeightTab data={data.weights} onSuccess={() => router.refresh()} />}
+          {tab === "calories" && <CaloriesTab data={data.nutrition} onSuccess={() => router.refresh()} />}
+          {tab === "sommeil" && <SleepTab data={data.sleep} onSuccess={() => router.refresh()} />}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Poids ──────────────────────────────────────────────────────────────────────
 function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess: () => void }) {
   const [height, setHeight] = useState<number | null>(null);
-
-  useEffect(() => {
-    const h = localStorage.getItem("user_height_cm");
-    if (h) setHeight(parseInt(h));
-  }, []);
+  useEffect(() => { const h = localStorage.getItem("user_height_cm"); if (h) setHeight(parseInt(h)); }, []);
 
   const today = format(new Date(), "yyyy-MM-dd");
   const { register, handleSubmit } = useForm({
@@ -81,20 +184,15 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
   const weights = data.map((w) => w.weight);
   const min = weights.length ? Math.min(...weights) : 0;
   const max = weights.length ? Math.max(...weights) : 0;
-  const avg = weights.length ? weights.reduce((a, b) => a + b, 0) / weights.length : 0;
-  const latestWeight = weights[weights.length - 1];
-  const first30 = weights[0];
-  const variation30 = weights.length >= 2 ? latestWeight - first30 : null;
+  const avg = weights.length ? +(weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1) : 0;
+  const latest = weights[weights.length - 1];
+  const bmi = height && latest ? +(latest / (height / 100) ** 2).toFixed(1) : null;
+  const bmiCat = bmi == null ? null : bmi < 18.5 ? { l: "Insuffisant", c: "#3B82F6" } : bmi < 25 ? { l: "Normal", c: SUCCESS } : bmi < 30 ? { l: "Surpoids", c: WARNING } : { l: "Obèse", c: DANGER };
 
-  // BMI
-  const bmi = height && latestWeight ? latestWeight / (height / 100) ** 2 : null;
-  const bmiLabel = bmi == null ? null : bmi < 18.5 ? { l: "Insuffisant", c: "text-blue-400" } : bmi < 25 ? { l: "Normal", c: "text-emerald-400" } : bmi < 30 ? { l: "Surpoids", c: "text-amber-400" } : { l: "Obèse", c: "text-red-400" };
-
-  // Moyenne mobile 7j
   const chartData = data.map((d, i) => {
     const slice = data.slice(Math.max(0, i - 6), i + 1);
-    const ma = slice.reduce((s, x) => s + x.weight, 0) / slice.length;
-    return { date: format(parseISO(d.date), "d MMM", { locale: fr }), Poids: d.weight, Tendance: parseFloat(ma.toFixed(2)) };
+    const ma = +(slice.reduce((s, x) => s + x.weight, 0) / slice.length).toFixed(2);
+    return { date: format(parseISO(d.date), "d MMM", { locale: fr }), Poids: d.weight, Tendance: ma };
   });
 
   async function onSubmit(values: any) {
@@ -102,306 +200,256 @@ function WeightTab({ data, onSuccess }: { data: SanteData["weights"]; onSuccess:
     if (res.ok) { toast.success("Poids enregistré !"); onSuccess(); } else toast.error("Erreur");
   }
 
-  function saveHeight(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = parseInt(e.target.value);
-    if (v > 100 && v < 250) { localStorage.setItem("user_height_cm", String(v)); setHeight(v); }
-  }
-
   return (
-    <>
-      <div className="card-dark p-4 space-y-3">
-        <p className="text-sm font-semibold text-white">Poids du jour</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Date"><Input type="date" {...register("date")} className="input-dark" /></Field>
-            <Field label="Poids (kg)"><Input type="number" step="0.1" {...register("weight")} className="input-dark" /></Field>
-          </div>
-          <Button type="submit" className="w-full bg-[#6495ED] hover:bg-[#4a7de8] text-white rounded-xl h-10">Enregistrer</Button>
-        </form>
-        {/* Taille pour IMC */}
-        <div className="pt-2 border-t border-white/[0.06]">
-          <Field label="Votre taille (cm) — pour l'IMC">
-            <Input type="number" defaultValue={height ?? ""} onChange={saveHeight} placeholder="ex. 178" className="input-dark" />
-          </Field>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Hero metric */}
+      <PulsingGlow intensity="low">
+        <div style={{ background: "var(--surface-1)", border: `1px solid ${ACCENT}20`, borderRadius: 20, padding: 24, textAlign: "center" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)", marginBottom: 8 }}>POIDS ACTUEL</p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: 72, lineHeight: 1, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+            <FlipNumber value={latest ? `${latest}` : "—"} />
+            <span style={{ fontSize: 24, color: "rgba(240,238,232,0.35)", marginLeft: 6 }}>KG</span>
+          </p>
+          {bmi != null && bmiCat && (
+            <span style={{ display: "inline-block", marginTop: 10, background: bmiCat.c + "20", color: bmiCat.c, border: `1px solid ${bmiCat.c}40`, fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 999 }}>
+              IMC {bmi} — {bmiCat.l}
+            </span>
+          )}
         </div>
-      </div>
+      </PulsingGlow>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-2">
-        <StatMini label="Min" value={`${min.toFixed(1)}`} unit="kg" />
-        <StatMini label="Moy." value={avg.toFixed(1)} unit="kg" color="text-[#6495ED]" />
-        <StatMini label="Max" value={`${max.toFixed(1)}`} unit="kg" />
-        <StatMini label="30j" value={variation30 != null ? `${variation30 >= 0 ? "+" : ""}${variation30.toFixed(1)}` : "—"} unit="kg"
-          color={variation30 != null ? (variation30 <= 0 ? "text-emerald-400" : "text-red-400") : "text-white"} />
-      </div>
-
-      {/* IMC */}
-      {bmi && bmiLabel && (
-        <div className="card-dark p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-zinc-500">Indice de masse corporelle</p>
-            <p className={`text-2xl font-bold mt-0.5 ${bmiLabel.c}`}>{bmi.toFixed(1)}</p>
+      {/* Stats pills */}
+      <div style={{ display: "flex", gap: 8 }}>
+        {[["MIN", min], ["MOY", avg], ["MAX", max]].map(([l, v]) => (
+          <div key={l as string} style={{ flex: 1, background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
+            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(240,238,232,0.25)", marginBottom: 4 }}>{l as string}</p>
+            <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{v as number} kg</p>
           </div>
-          <span className={`text-sm font-semibold px-3 py-1 rounded-full bg-white/5 ${bmiLabel.c}`}>{bmiLabel.l}</span>
+        ))}
+      </div>
+
+      {/* Input */}
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
+        <div style={{ display: "flex", gap: 10 }}>
+          <input {...register("date")} type="date" className="input-dark" style={{ flex: 1 }} />
+          <input {...register("weight")} type="number" step="0.1" placeholder="75.5" className="input-dark" style={{ flex: 1 }} />
+        </div>
+        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+          ENREGISTRER
+        </motion.button>
+      </form>
+
+      {/* Chart */}
+      {chartData.length > 0 && (
+        <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20 }}>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>ÉVOLUTION</p>
+          <ResponsiveContainer width="100%" height={160}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
+              <defs>
+                <linearGradient id="wg2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={ACCENT} stopOpacity={0.22} />
+                  <stop offset="100%" stopColor={ACCENT} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
+              <XAxis dataKey="date" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 10 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+              <Tooltip content={<Tip />} cursor={{ stroke: `${ACCENT}40`, strokeWidth: 1, strokeDasharray: "4 4" }} />
+              <Area type="monotone" dataKey="Poids" stroke={ACCENT} strokeWidth={2.5} fill="url(#wg2)" dot={false} activeDot={{ r: 5, fill: "#fff", stroke: ACCENT, strokeWidth: 2 }} />
+              <Area type="monotone" dataKey="Tendance" stroke={GOLD} strokeWidth={1.5} strokeDasharray="6 3" fill="none" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       )}
-
-      <div className="card-dark p-4">
-        <p className="text-sm font-semibold text-white mb-3">Évolution + tendance — 30j</p>
-        <ResponsiveContainer width="100%" height={160}>
-          <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-            <XAxis dataKey="date" tick={{ fill: "#555", fontSize: 9 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-            <YAxis tick={{ fill: "#555", fontSize: 10 }} tickLine={false} axisLine={false} domain={["dataMin - 0.5", "dataMax + 0.5"]} />
-            <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
-            <Line type="monotone" dataKey="Poids" stroke={ACCENT} strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-            <Line type="monotone" dataKey="Tendance" stroke={ACCENT} strokeWidth={1.5} dot={false} strokeDasharray="5 3" opacity={0.5} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </>
+    </div>
   );
 }
 
-// ── Onglet Calories ───────────────────────────────────────────────────────────
+// ── Calories ───────────────────────────────────────────────────────────────────
 function CaloriesTab({ data, onSuccess }: { data: SanteData["nutrition"]; onSuccess: () => void }) {
-  const [goal, setGoal] = useState(2500);
-  const [importing, setImporting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { const g = localStorage.getItem("calorie_goal"); if (g) setGoal(parseInt(g)); }, []);
-
+  const latest = data[data.length - 1];
+  const calorieGoal = typeof window !== "undefined" ? parseInt(localStorage.getItem("calorie_goal") ?? "2500") : 2500;
   const today = format(new Date(), "yyyy-MM-dd");
-  const { register, handleSubmit, watch } = useForm({
-    resolver: zodResolver(nutritionSchema),
-    defaultValues: { date: today, calories: 2000, protein: 150, carbs: 200, fat: 65 },
-  });
+  const { register, handleSubmit } = useForm({ resolver: zodResolver(nutritionSchema), defaultValues: { date: today, calories: 0, protein: 0, carbs: 0, fat: 0 } });
 
-  const _watchCal = watch("calories") ?? 0;
-  const watchProt = watch("protein") ?? 0;
-  const watchCarbs = watch("carbs") ?? 0;
-  const watchFat = watch("fat") ?? 0;
-
-  const todayData = data[data.length - 1];
-  const pct = todayData ? Math.min(Math.round((todayData.calories / goal) * 100), 120) : 0;
-  const avgCal = data.length ? Math.round(data.reduce((a, b) => a + b.calories, 0) / data.length) : 0;
-
-  // Donut macros du jour d'entrée form
-  const totalMacroG = Number(watchProt) + Number(watchCarbs) + Number(watchFat);
-  const pieData = totalMacroG > 0 ? [
-    { name: "Protéines", value: Number(watchProt), fill: "#6495ED" },
-    { name: "Glucides", value: Number(watchCarbs), fill: "#f97316" },
-    { name: "Lipides", value: Number(watchFat), fill: "#10b981" },
+  const donutData = latest ? [
+    { name: "Prot.", value: latest.protein, color: ACCENT },
+    { name: "Gluc.", value: latest.carbs, color: "#A78BFA" },
+    { name: "Lip.", value: latest.fat, color: GOLD },
   ] : [];
-
-  const chartData = data.map((d) => ({
-    date: format(parseISO(d.date), "EEE", { locale: fr }),
-    Calories: d.calories,
-    Objectif: goal,
-  }));
 
   async function onSubmit(values: any) {
     const res = await fetch("/api/nutrition", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) });
-    if (res.ok) { toast.success("Nutrition enregistrée !"); onSuccess(); } else toast.error("Erreur");
-  }
-
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/nutrition/import", { method: "POST", body: formData });
-    setImporting(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (res.ok) {
-      const { imported, skipped } = await res.json();
-      toast.success(`${imported} entrée(s) importée(s)${skipped > 0 ? `, ${skipped} ignorée(s)` : ""}`);
-      onSuccess();
-    } else {
-      const err = await res.json();
-      toast.error(err.error ?? "Erreur d'import");
-    }
+    if (res.ok) { toast.success("Calories enregistrées !"); onSuccess(); } else toast.error("Erreur");
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit(onSubmit)} className="card-dark p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-white">Entrée du jour</p>
-          <button type="button" onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 text-xs text-[#6495ED] hover:text-[#9bb9f3] transition-colors">
-            <Upload size={12} /> {importing ? "Import…" : "Importer Yazio"}
-          </button>
-          <input ref={fileInputRef} type="file" accept=".csv" onChange={handleImport} className="hidden" />
-        </div>
-        <Field label="Date"><Input type="date" {...register("date")} className="input-dark" /></Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Calories (kcal)"><Input type="number" {...register("calories")} className="input-dark" /></Field>
-          <Field label="Protéines (g)"><Input type="number" step="0.1" {...register("protein")} className="input-dark" /></Field>
-          <Field label="Glucides (g)"><Input type="number" step="0.1" {...register("carbs")} className="input-dark" /></Field>
-          <Field label="Lipides (g)"><Input type="number" step="0.1" {...register("fat")} className="input-dark" /></Field>
-        </div>
-        <Button type="submit" className="w-full bg-[#6495ED] hover:bg-[#4a7de8] text-white rounded-xl h-10">Enregistrer</Button>
-      </form>
-
-      {/* Objectif calorique */}
-      <div className="card-dark p-4 space-y-2">
-        <div className="flex justify-between items-center">
-          <p className="text-sm font-semibold text-white">Objectif calorique</p>
-          <Input type="number" defaultValue={goal} onChange={(e) => { const v = parseInt(e.target.value); if (v > 500) { setGoal(v); localStorage.setItem("calorie_goal", String(v)); }}}
-            className="input-dark w-24 h-8 text-right text-sm" />
-        </div>
-        {todayData && (
-          <>
-            <div className="flex justify-between text-xs text-zinc-500">
-              <span>{todayData.calories} kcal</span><span>{goal} kcal</span>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Donut */}
+      {latest && (
+        <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <ResponsiveContainer width={160} height={160}>
+                <PieChart>
+                  <Pie data={donutData} cx={80} cy={80} innerRadius={55} outerRadius={75} dataKey="value" paddingAngle={3} startAngle={90} endAngle={-270}>
+                    {donutData.map((d, i) => <Cell key={i} fill={d.color} strokeWidth={0} />)}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>{latest.calories}</span>
+                <span style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", letterSpacing: "0.08em" }}>KCAL</span>
+              </div>
             </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(pct, 100)}%`, background: pct > 110 ? "#ef4444" : pct > 95 ? "#f97316" : "#6495ED" }} />
-            </div>
-            <p className="text-xs text-zinc-500 text-right">{pct}% de l'objectif</p>
-          </>
-        )}
-      </div>
-
-      {/* Donut macros */}
-      {pieData.length > 0 && (
-        <div className="card-dark p-4">
-          <p className="text-sm font-semibold text-white mb-3">Répartition macros (entrée)</p>
-          <div className="flex items-center gap-4">
-            <PieChart width={120} height={120}>
-              <Pie data={pieData} cx={55} cy={55} innerRadius={35} outerRadius={55} paddingAngle={2} dataKey="value">
-                {pieData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
-              </Pie>
-            </PieChart>
-            <div className="space-y-2">
-              {pieData.map((d) => (
-                <div key={d.name} className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.fill }} />
-                  <span className="text-xs text-zinc-400">{d.name}</span>
-                  <span className="text-xs font-semibold text-white ml-auto pl-4">{d.value}g</span>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+              {donutData.map((d) => (
+                <div key={d.name}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: d.color }}>{d.name}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-primary)" }}>{d.value}g</span>
+                  </div>
+                  <BeamProg value={d.value} max={d.value + 10} color={d.color} />
                 </div>
               ))}
             </div>
           </div>
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: "rgba(240,238,232,0.35)" }}>Objectif journalier</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: ACCENT, fontWeight: 700 }}>{latest.calories} / {calorieGoal} kcal</span>
+            </div>
+            <BeamProg value={latest.calories} max={calorieGoal} color={latest.calories > calorieGoal * 1.1 ? DANGER : ACCENT} />
+          </div>
         </div>
       )}
 
-      {/* Graphique 7j */}
-      <div className="card-dark p-4">
-        <div className="flex justify-between items-center mb-3">
-          <p className="text-sm font-semibold text-white">7 jours</p>
-          <span className="text-xs text-zinc-500">Moy. {avgCal} kcal</span>
-        </div>
-        <ResponsiveContainer width="100%" height={140}>
-          <BarChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -22 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: "#555", fontSize: 10 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fill: "#555", fontSize: 10 }} tickLine={false} axisLine={false} domain={[1200, "dataMax + 200"]} />
-            <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
-            <ReferenceLine y={goal} stroke={ACCENT} strokeDasharray="4 3" opacity={0.6} />
-            <Bar dataKey="Calories" fill={ACCENT} radius={[4, 4, 0, 0]} opacity={0.85} />
-          </BarChart>
-        </ResponsiveContainer>
+      {/* Import CSV + Form */}
+      <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input {...register("date")} type="date" className="input-dark" style={{ flex: 1 }} />
+            <input {...register("calories")} type="number" placeholder="Calories" className="input-dark" style={{ flex: 1 }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+            <input {...register("protein")} type="number" step="0.1" placeholder="Prot. g" className="input-dark" />
+            <input {...register("carbs")} type="number" step="0.1" placeholder="Gluc. g" className="input-dark" />
+            <input {...register("fat")} type="number" step="0.1" placeholder="Lip. g" className="input-dark" />
+          </div>
+          <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+            ENREGISTRER
+          </motion.button>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
 
-// ── Onglet Sommeil ────────────────────────────────────────────────────────────
+// ── Sommeil ────────────────────────────────────────────────────────────────────
 function SleepTab({ data, onSuccess }: { data: SanteData["sleep"]; onSuccess: () => void }) {
-  const [quality, setQuality] = useState(4);
   const today = format(new Date(), "yyyy-MM-dd");
-  const { register, handleSubmit } = useForm({
-    resolver: zodResolver(sleepSchema),
-    defaultValues: { date: today, bedtime: "23:00", wakeTime: "07:00" },
-  });
+  const latest = data[data.length - 1];
+  const { register, handleSubmit } = useForm({ resolver: zodResolver(sleepSchema), defaultValues: { date: today, bedtime: "23:00", wakeTime: "07:00" } });
 
-  const recent7 = data.slice(-7);
-  const avgDur = recent7.length ? (recent7.reduce((a, b) => a + b.duration, 0) / recent7.length).toFixed(1) : "—";
-  const avgScore = recent7.length ? Math.round(recent7.reduce((a, b) => a + ((b.duration / 8) * 0.6 + (b.quality / 5) * 0.4) * 100, 0) / recent7.length) : null;
-
-  const chartData = data.map((d) => ({
+  const scoreColor = (d: number) => d >= 8 ? SUCCESS : d >= 6 ? WARNING : DANGER;
+  const last14 = data.slice(-14).map((d) => ({
     date: format(parseISO(d.date), "d MMM", { locale: fr }),
-    Durée: d.duration,
-    Qualité: d.quality,
-    Score: Math.round((d.duration / 8 * 0.6 + d.quality / 5 * 0.4) * 100),
+    Durée: +d.duration.toFixed(1),
+    score: d.quality,
   }));
 
   async function onSubmit(values: any) {
+    // Calculate duration from bedtime and wakeTime
+    const [bh, bm] = values.bedtime.split(":").map(Number);
+    const [wh, wm] = values.wakeTime.split(":").map(Number);
+    let dur = (wh * 60 + wm) - (bh * 60 + bm);
+    if (dur < 0) dur += 24 * 60;
     const res = await fetch("/api/sleep", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...values, quality }),
+      body: JSON.stringify({ ...values, duration: +(dur / 60).toFixed(2), quality: Math.min(100, Math.round((dur / 60 / 8) * 100)) }),
     });
     if (res.ok) { toast.success("Sommeil enregistré !"); onSuccess(); } else toast.error("Erreur");
   }
 
   return (
-    <>
-      <div className="card-dark p-4 space-y-3">
-        <p className="text-sm font-semibold text-white">Nuit du jour</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <Field label="Date"><Input type="date" {...register("date")} className="input-dark" /></Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Coucher"><Input type="time" {...register("bedtime")} className="input-dark" /></Field>
-            <Field label="Réveil"><Input type="time" {...register("wakeTime")} className="input-dark" /></Field>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-zinc-400">Qualité : {quality}/5</label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((v) => (
-                <button key={v} type="button" onClick={() => setQuality(v)}
-                  className={`flex-1 h-9 rounded-xl text-sm font-bold transition-colors ${quality >= v ? "bg-[#6495ED] text-white" : "bg-white/5 text-zinc-600"}`}>
-                  {v}
-                </button>
-              ))}
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Hero card */}
+      {latest && (
+        <div style={{ background: "var(--surface-1)", border: `1px solid ${scoreColor(latest.duration)}30`, borderRadius: 20, padding: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)", marginBottom: 8 }}>
+                {latest.bedtime && latest.wakeTime ? `${latest.bedtime} → ${latest.wakeTime}` : "DERNIÈRE NUIT"}
+              </p>
+              <p style={{ fontFamily: "var(--font-display)", fontSize: 56, lineHeight: 1, color: "var(--text-primary)" }}>
+                <FlipNumber value={latest.duration.toFixed(1)} />
+                <span style={{ fontSize: 20, color: "rgba(240,238,232,0.35)", marginLeft: 6 }}>H</span>
+              </p>
+            </div>
+            {/* Score circle */}
+            <div style={{ position: "relative", width: 56, height: 56 }}>
+              <svg width={56} height={56} style={{ transform: "rotate(-90deg)" }}>
+                <circle cx={28} cy={28} r={23} stroke="var(--surface-3)" strokeWidth={4} fill="none" />
+                <motion.circle
+                  cx={28} cy={28} r={23}
+                  stroke={scoreColor(latest.duration)} strokeWidth={4} fill="none"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 23}
+                  initial={{ strokeDashoffset: 2 * Math.PI * 23 }}
+                  animate={{ strokeDashoffset: 2 * Math.PI * 23 * (1 - Math.min(latest.duration / 8, 1)) }}
+                  transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1], delay: 0.2 }}
+                  style={{ filter: `drop-shadow(0 0 5px ${scoreColor(latest.duration)}80)` }}
+                />
+              </svg>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: scoreColor(latest.duration) }}>
+                  {Math.round(Math.min(latest.duration / 8, 1) * 100)}
+                </span>
+              </div>
             </div>
           </div>
-          <Button type="submit" className="w-full bg-[#6495ED] hover:bg-[#4a7de8] text-white rounded-xl h-10">Enregistrer</Button>
-        </form>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card-dark p-4">
-          <p className="text-[10px] text-zinc-500 uppercase tracking-wide">Durée moy. 7j</p>
-          <p className="text-2xl font-bold text-[#6495ED] mt-1">{avgDur}h</p>
         </div>
-        <div className="card-dark p-4">
-          <p className="text-[10px] text-zinc-500 uppercase tracking-wide">Score moy. 7j</p>
-          <p className={`text-2xl font-bold mt-1 ${avgScore != null ? (avgScore >= 70 ? "text-emerald-400" : avgScore >= 50 ? "text-amber-400" : "text-red-400") : "text-white"}`}>
-            {avgScore ?? "—"}{avgScore != null ? "/100" : ""}
-          </p>
+      )}
+
+      {/* 14-day chart */}
+      {last14.length > 0 && (
+        <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20 }}>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: "0.03em", color: "var(--text-primary)", marginBottom: 16 }}>14 DERNIÈRES NUITS</p>
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart data={last14} margin={{ top: 5, right: 5, bottom: 0, left: -30 }}>
+              <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.04)" />
+              <XAxis dataKey="date" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} interval={2} />
+              <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} domain={[0, 10]} />
+              <Tooltip content={<Tip />} />
+              <Bar dataKey="Durée" radius={[4, 4, 0, 0]}>
+                {last14.map((d, i) => (
+                  <Cell key={i} fill={d.Durée >= 8 ? SUCCESS : d.Durée >= 6 ? WARNING : DANGER} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-      </div>
+      )}
 
-      <div className="card-dark p-4">
-        <p className="text-sm font-semibold text-white mb-3">14 jours</p>
-        <ResponsiveContainer width="100%" height={150}>
-          <BarChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -22 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: "#555", fontSize: 9 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-            <YAxis tick={{ fill: "#555", fontSize: 10 }} tickLine={false} axisLine={false} domain={[4, 10]} />
-            <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} formatter={(v: any, n: any) => [n === "Durée" ? `${v}h` : v, n]} />
-            <ReferenceLine y={8} stroke="#3b82f6" strokeDasharray="4 3" opacity={0.4} />
-            <Bar dataKey="Durée" fill="#3b82f6" radius={[4, 4, 0, 0]} opacity={0.8} />
-            <Line dataKey="Qualité" stroke="#f97316" strokeWidth={2} dot={false} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </>
-  );
-}
-
-function StatMini({ label, value, unit, color = "text-white" }: { label: string; value: string; unit: string; color?: string }) {
-  return (
-    <div className="card-dark p-3">
-      <p className="text-[9px] text-zinc-500 uppercase">{label}</p>
-      <p className={`text-base font-bold mt-0.5 ${color}`}>{value}<span className="text-[10px] ml-0.5 text-zinc-500">{unit}</span></p>
+      {/* Form */}
+      <form onSubmit={handleSubmit(onSubmit)} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(240,238,232,0.3)" }}>ENREGISTRER</p>
+        <input {...register("date")} type="date" className="input-dark" />
+        <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", marginBottom: 4 }}>COUCHER</p>
+            <input {...register("bedtime")} type="time" className="input-dark" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 10, color: "rgba(240,238,232,0.35)", marginBottom: 4 }}>RÉVEIL</p>
+            <input {...register("wakeTime")} type="time" className="input-dark" />
+          </div>
+        </div>
+        <motion.button whileTap={{ scale: 0.97 }} type="submit" className="shimmer-btn" style={{ background: `linear-gradient(135deg, ${ACCENT}, #00B8CC)`, color: "#050508", borderRadius: 12, height: 46, fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+          ENREGISTRER
+        </motion.button>
+      </form>
     </div>
   );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="space-y-1"><label className="text-xs text-zinc-400 font-medium">{label}</label>{children}</div>;
 }

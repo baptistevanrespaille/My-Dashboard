@@ -2,13 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, ChevronDown, ChevronUp, Dumbbell, Timer, MapPin, Heart } from "lucide-react";
-import { format, parseISO, startOfWeek, addWeeks, getISOWeek } from "date-fns";
+import { Plus, ChevronDown, Dumbbell, Timer, MapPin, Heart } from "lucide-react";
+import { format, parseISO, startOfWeek, addWeeks, getISOWeek, isThisWeek, isThisMonth } from "date-fns";
 import { fr } from "date-fns/locale";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
-import PageHeader from "@/components/PageHeader";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import WorkoutModal from "./WorkoutModal";
 import { useRouter, useSearchParams } from "next/navigation";
+import Card3D from "@/components/Card3D";
+import FlipNumber from "@/components/FlipNumber";
+
+const ACCENT  = "#00E5FF";
+const SUCCESS = "#00E676";
+const DANGER  = "#FF3D57";
+const WARNING = "#FFB300";
+const SPRING  = { type: "spring", stiffness: 380, damping: 35 } as const;
 
 export type Session = {
   id: string; date: string; type: string; sessionLabel: string | null;
@@ -17,47 +25,61 @@ export type Session = {
   cardioLog: { distanceKm: number | null; avgPaceMinPerKm: number | null; avgHeartRate: number | null; route: string | null } | null;
 };
 
-const LABEL_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  PUSH:      { bg: "bg-blue-500/20",    text: "text-blue-300",    label: "Push" },
-  PULL:      { bg: "bg-emerald-500/20", text: "text-emerald-300", label: "Pull" },
-  LEGS:      { bg: "bg-orange-500/20",  text: "text-orange-300",  label: "Legs" },
-  FULL_BODY: { bg: "bg-purple-500/20",  text: "text-purple-300",  label: "Full Body" },
-  RUNNING:   { bg: "bg-red-500/20",     text: "text-red-300",     label: "Running" },
-  CYCLING:   { bg: "bg-cyan-500/20",    text: "text-cyan-300",    label: "Vélo" },
-  ROWING:    { bg: "bg-teal-500/20",    text: "text-teal-300",    label: "Rameur" },
-  ELLIPTICAL:{ bg: "bg-pink-500/20",    text: "text-pink-300",    label: "Elliptique" },
-  OTHER:     { bg: "bg-zinc-500/20",    text: "text-zinc-300",    label: "Autre" },
+const SESSION_COLOR: Record<string, string> = {
+  PUSH: "#6495ED", PULL: SUCCESS, LEGS: WARNING,
+  RUNNING: DANGER, CARDIO: DANGER, FULL_BODY: "#A78BFA",
+  CYCLING: ACCENT, ROWING: "#14B8A6", ELLIPTICAL: "#EC4899", OTHER: "#64748B",
+};
+const SESSION_LABEL_MAP: Record<string, string> = {
+  PUSH: "Push", PULL: "Pull", LEGS: "Legs",
+  RUNNING: "Running", CARDIO: "Cardio", FULL_BODY: "Full Body",
+  CYCLING: "Vélo", ROWING: "Rameur", ELLIPTICAL: "Elliptique", OTHER: "Autre",
 };
 
-function sessionVolume(s: Session): number {
-  return s.exercises.reduce((t, ex) => t + ex.sets.reduce((s, set) => s + set.reps * set.weightKg, 0), 0);
+function sessionVolume(s: Session) {
+  return s.exercises.reduce((t, ex) => t + ex.sets.reduce((a, set) => a + set.reps * set.weightKg, 0), 0);
+}
+
+function BarTip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "rgba(12,12,18,0.97)", border: `1px solid ${ACCENT}35`, borderRadius: 10, padding: "8px 12px", backdropFilter: "blur(8px)" }}>
+      <p style={{ fontSize: 10, color: "rgba(240,238,232,0.4)", marginBottom: 4 }}>{label}</p>
+      {payload.map((p: any) => (
+        <div key={p.dataKey} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: p.fill }} />
+          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-primary)" }}>{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function SportClient({ sessions }: { sessions: Session[] }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"freq" | "volume" | "distance">("freq");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Auto-open modal if ?modal=true is in the URL
   useEffect(() => {
     if (searchParams.get("modal") === "true") {
       setModalOpen(true);
-      // Clean the URL without reload
       window.history.replaceState(null, "", "/sport");
     }
   }, [searchParams]);
 
-  // Streak
   let streak = 0;
   const dates = new Set(sessions.map((s) => s.date));
   for (let i = 0; i <= 35; i++) {
     const d = new Date(); d.setDate(d.getDate() - i);
-    const k = d.toISOString().split("T")[0];
-    if (dates.has(k)) streak++; else if (i > 0) break;
+    if (dates.has(d.toISOString().split("T")[0])) streak++; else if (i > 0) break;
   }
 
-  // Graphiques 8 semaines
+  const monthSessions = sessions.filter((s) => isThisMonth(parseISO(s.date)));
+  const monthVolume = monthSessions.reduce((t, s) => t + sessionVolume(s), 0);
+  const monthKm = monthSessions.reduce((t, s) => t + (s.cardioLog?.distanceKm ?? 0), 0);
+
   const weeks: { label: string; PUSH: number; PULL: number; LEGS: number; Cardio: number; volume: number; km: number }[] = [];
   for (let i = 7; i >= 0; i--) {
     const ws = startOfWeek(addWeeks(new Date(), -i), { weekStartsOn: 1 });
@@ -66,27 +88,27 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
   sessions.forEach((s) => {
     const ws = startOfWeek(parseISO(s.date), { weekStartsOn: 1 });
     const label = `S${getISOWeek(ws)}`;
-    const w = weeks.find((w) => w.label === label);
+    const w = weeks.find((wk) => wk.label === label);
     if (!w) return;
     const lbl = s.sessionLabel ?? "OTHER";
     if (s.type === "STRENGTH") {
       if (lbl === "PUSH") w.PUSH++;
       else if (lbl === "PULL") w.PULL++;
       else if (lbl === "LEGS") w.LEGS++;
-      w.volume += sessionVolume(s) / 1000;
+      w.volume = parseFloat((w.volume + sessionVolume(s) / 1000).toFixed(1));
     } else {
       w.Cardio++;
-      w.km += s.cardioLog?.distanceKm ?? 0;
+      w.km = parseFloat((w.km + (s.cardioLog?.distanceKm ?? 0)).toFixed(1));
     }
   });
-  weeks.forEach((w) => { w.volume = parseFloat(w.volume.toFixed(1)); w.km = parseFloat(w.km.toFixed(1)); });
 
-  // Sessions groupées par semaine
   const grouped: Record<string, Session[]> = {};
   sessions.forEach((s) => {
-    const ws = format(startOfWeek(parseISO(s.date), { weekStartsOn: 1 }), "'Sem. du' d MMM", { locale: fr });
-    grouped[ws] = grouped[ws] ?? [];
-    grouped[ws].push(s);
+    const key = isThisWeek(parseISO(s.date), { weekStartsOn: 1 })
+      ? "CETTE SEMAINE"
+      : format(startOfWeek(parseISO(s.date), { weekStartsOn: 1 }), "'SEM.' d MMM", { locale: fr }).toUpperCase();
+    grouped[key] = grouped[key] ?? [];
+    grouped[key].push(s);
   });
 
   async function handleSave(data: any) {
@@ -98,78 +120,139 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
   }
 
   return (
-    <div className="px-4 space-y-4">
-      <PageHeader
-        title="Sport"
-        subtitle={streak > 0 ? `🔥 ${streak} jour${streak > 1 ? "s" : ""} de suite` : `${sessions.length} sessions`}
-        action={
-          <button onClick={() => setModalOpen(true)} className="flex items-center gap-1.5 bg-[#6495ED] hover:bg-[#4a7de8] text-white text-sm font-semibold px-3 py-2 rounded-xl transition-colors">
-            <Plus size={15} /> Session
-          </button>
-        }
-      />
+    <div style={{ padding: "0 20px 20px" }}>
 
-      {/* Graphique fréquence par type */}
-      <div className="card-dark p-4">
-        <p className="text-sm font-semibold text-white mb-3">Sessions / semaine par type</p>
-        <ResponsiveContainer width="100%" height={130}>
-          <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-            <XAxis dataKey="label" tick={{ fill: "#555", fontSize: 9 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fill: "#555", fontSize: 9 }} tickLine={false} axisLine={false} allowDecimals={false} />
-            <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #333", borderRadius: 8, fontSize: 10 }} />
-            <Legend wrapperStyle={{ fontSize: 10, color: "#777" }} />
-            <Bar dataKey="PUSH" stackId="a" fill="#3b82f6" radius={[0,0,0,0]} />
-            <Bar dataKey="PULL" stackId="a" fill="#10b981" />
-            <Bar dataKey="LEGS" stackId="a" fill="#f97316" />
-            <Bar dataKey="Cardio" stackId="a" fill="#ef4444" radius={[4,4,0,0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* HEADER */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }} style={{ paddingTop: 60, paddingBottom: 20 }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 56, letterSpacing: "0.05em", color: "var(--text-primary)", lineHeight: 1 }}>SPORT</h1>
+        <p style={{ fontSize: 13, color: "rgba(240,238,232,0.45)", marginTop: 6, fontFamily: "var(--font-mono)" }}>
+          {format(new Date(), "MMMM yyyy", { locale: fr }).toUpperCase()}
+          <span style={{ color: ACCENT, margin: "0 8px" }}>·</span>
+          {monthSessions.length} SÉANCES
+          <span style={{ color: ACCENT, margin: "0 8px" }}>·</span>
+          {(monthVolume / 1000).toFixed(1)} T
+          {streak > 0 && <><span style={{ color: ACCENT, margin: "0 8px" }}>·</span>🔥 {streak}j</>}
+        </p>
+        <div style={{ height: 1, marginTop: 16, background: `linear-gradient(90deg, transparent, ${ACCENT}33, transparent)` }} />
+      </motion.div>
 
-      {/* Volume muscu + distance cardio */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card-dark p-3">
-          <p className="text-xs font-semibold text-white mb-2">Volume (t/sem)</p>
-          <ResponsiveContainer width="100%" height={80}>
-            <LineChart data={weeks} margin={{ top: 2, right: 2, bottom: 0, left: -30 }}>
-              <XAxis dataKey="label" tick={{ fill: "#555", fontSize: 8 }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #333", borderRadius: 8, fontSize: 10 }} formatter={(v: any) => [`${v}t`]} />
-              <Line type="monotone" dataKey="volume" stroke="#6495ED" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="card-dark p-3">
-          <p className="text-xs font-semibold text-white mb-2">Distance (km/sem)</p>
-          <ResponsiveContainer width="100%" height={80}>
-            <BarChart data={weeks} margin={{ top: 2, right: 2, bottom: 0, left: -30 }}>
-              <XAxis dataKey="label" tick={{ fill: "#555", fontSize: 8 }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #333", borderRadius: 8, fontSize: 10 }} formatter={(v: any) => [`${v} km`]} />
-              <Bar dataKey="km" fill="#ef4444" radius={[3,3,0,0]} opacity={0.85} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Sessions groupées */}
-      <div className="space-y-4">
-        {Object.keys(grouped).length === 0 && (
-          <div className="card-dark p-8 text-center">
-            <Dumbbell size={32} className="text-zinc-700 mx-auto mb-3" />
-            <p className="text-zinc-500 text-sm">Aucune session. Lance-toi !</p>
-          </div>
-        )}
-        {Object.entries(grouped).map(([week, weekSessions]) => (
-          <div key={week}>
-            <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider px-1 mb-1.5">{week}</p>
-            <div className="space-y-1.5">
-              {weekSessions.map((s) => (
-                <SessionCard key={s.id} session={s} expanded={expanded === s.id} onToggle={() => setExpanded(expanded === s.id ? null : s.id)} />
-              ))}
-            </div>
+      {/* STATS ROW */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {[
+          { label: "SÉANCES", value: `${monthSessions.length}`, unit: "" },
+          { label: "VOLUME", value: `${(monthVolume / 1000).toFixed(1)}`, unit: "t" },
+          { label: "KM", value: `${monthKm.toFixed(1)}`, unit: "km" },
+        ].map((s, i) => (
+          <div key={i} style={{ flex: 1, background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: "12px 10px", textAlign: "center" }}>
+            <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.1em", color: "rgba(240,238,232,0.25)", marginBottom: 4 }}>{s.label}</p>
+            <p style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--text-primary)", lineHeight: 1 }}>
+              <FlipNumber value={s.value} /><span style={{ fontSize: 13, color: "rgba(240,238,232,0.35)", marginLeft: 2 }}>{s.unit}</span>
+            </p>
           </div>
         ))}
+      </motion.div>
+
+      {/* CHART */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.45, ease: [0.32, 0.72, 0, 1] }} style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+        <div style={{ display: "flex", background: "var(--surface-2)", borderRadius: 12, padding: 4, marginBottom: 16 }}>
+          {([["freq", "FRÉQUENCE"], ["volume", "VOLUME"], ["distance", "DISTANCE"]] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setActiveTab(k)} style={{
+              flex: 1, padding: "8px 4px", borderRadius: 8, fontSize: 10, fontWeight: 700,
+              letterSpacing: "0.08em", border: "none", cursor: "pointer", minHeight: 36,
+              fontFamily: "var(--font-sans)",
+              background: activeTab === k ? ACCENT : "transparent",
+              color: activeTab === k ? "#050508" : "rgba(240,238,232,0.3)",
+              boxShadow: activeTab === k ? `0 0 12px ${ACCENT}40` : "none",
+              transition: "all 0.2s cubic-bezier(0.32,0.72,0,1)",
+            }}>{l}</button>
+          ))}
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <ResponsiveContainer width="100%" height={140}>
+              {activeTab === "freq" ? (
+                <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip content={<BarTip />} />
+                  <Bar dataKey="PUSH" stackId="a" fill="#6495ED" />
+                  <Bar dataKey="PULL" stackId="a" fill={SUCCESS} />
+                  <Bar dataKey="LEGS" stackId="a" fill={WARNING} />
+                  <Bar dataKey="Cardio" stackId="a" fill={DANGER} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              ) : activeTab === "volume" ? (
+                <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <Tooltip content={<BarTip />} />
+                  <Bar dataKey="volume" fill={ACCENT} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              ) : (
+                <BarChart data={weeks} margin={{ top: 5, right: 5, bottom: 0, left: -25 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fill: "rgba(240,238,232,0.25)", fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <Tooltip content={<BarTip />} />
+                  <Bar dataKey="km" fill={DANGER} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              )}
+            </ResponsiveContainer>
+          </motion.div>
+        </AnimatePresence>
+        {activeTab === "freq" && (
+          <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
+            {[["PUSH", "#6495ED"], ["PULL", SUCCESS], ["LEGS", WARNING], ["CARDIO", DANGER]].map(([l, c]) => (
+              <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(240,238,232,0.35)" }}>{l}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      {/* SESSION LIST */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        {Object.keys(grouped).length === 0 ? (
+          <div style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: 48, textAlign: "center" }}>
+            <Dumbbell size={36} style={{ color: "rgba(240,238,232,0.15)", display: "block", margin: "0 auto 12px" }} />
+            <p style={{ color: "rgba(240,238,232,0.3)", fontSize: 14 }}>Aucune session. Lance-toi !</p>
+          </div>
+        ) : (
+          Object.entries(grouped).map(([week, wSessions], wi) => (
+            <motion.div key={week} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + wi * 0.06, duration: 0.4, ease: [0.32, 0.72, 0, 1] }}>
+              <p style={{ fontFamily: "var(--font-display)", fontSize: 18, letterSpacing: "0.08em", color: "rgba(240,238,232,0.25)", marginBottom: 10 }}>{week}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {wSessions.map((s) => (
+                  <SessionCard key={s.id} session={s} expanded={expanded === s.id} onToggle={() => setExpanded(expanded === s.id ? null : s.id)} />
+                ))}
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
+
+      {/* FAB */}
+      <motion.button
+        whileTap={{ scale: 0.88 }}
+        onClick={() => setModalOpen(true)}
+        style={{
+          position: "fixed", bottom: 100, right: 20,
+          width: 64, height: 64, borderRadius: "50%",
+          background: `radial-gradient(circle at 40% 35%, ${ACCENT}, #00B8CC)`,
+          border: "none", cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: `0 8px 32px ${ACCENT}40, 0 0 0 1px ${ACCENT}25`,
+          zIndex: 30,
+          animation: "pulseGlow 3s ease-in-out infinite alternate",
+          ["--glow-from" as string]: `0 8px 32px ${ACCENT}30`,
+          ["--glow-to" as string]: `0 8px 48px ${ACCENT}60`,
+        }}
+      >
+        <Plus size={28} style={{ color: "#050508" }} strokeWidth={2.5} />
+      </motion.button>
 
       <WorkoutModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSave} />
     </div>
@@ -178,67 +261,80 @@ export default function SportClient({ sessions }: { sessions: Session[] }) {
 
 function SessionCard({ session, expanded, onToggle }: { session: Session; expanded: boolean; onToggle: () => void }) {
   const lbl = session.sessionLabel ?? "OTHER";
-  const style = LABEL_STYLE[lbl] ?? LABEL_STYLE.OTHER;
+  const color = SESSION_COLOR[lbl] ?? SESSION_COLOR.OTHER;
+  const label = SESSION_LABEL_MAP[lbl] ?? "Autre";
   const isCardio = session.type !== "STRENGTH";
   const volume = !isCardio ? sessionVolume(session) : 0;
   const dateStr = format(parseISO(session.date), "EEE d MMM", { locale: fr });
 
   return (
-    <div className="card-dark overflow-hidden">
-      <button onClick={onToggle} className="w-full flex items-center gap-3 p-3.5 text-left">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isCardio ? "bg-red-500/15" : "bg-[#6495ED]/15"}`}>
-          {isCardio ? <Timer size={16} className="text-red-400" /> : <Dumbbell size={16} className="text-[#6495ED]" />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-semibold ${style.bg} ${style.text}`}>{style.label}</span>
-            {volume > 0 && <span className="text-[10px] text-zinc-500">{(volume / 1000).toFixed(1)}t vol.</span>}
-            {session.cardioLog?.distanceKm && <span className="text-[10px] text-zinc-500">{session.cardioLog.distanceKm} km</span>}
+    <Card3D maxRotation={3}>
+      <motion.div layout style={{ background: "var(--surface-1)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, overflow: "hidden", borderLeft: `4px solid ${color}` }}>
+        <button onClick={onToggle} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 16px 14px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", minHeight: 64 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: color + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {isCardio ? <Timer size={17} style={{ color }} /> : <Dumbbell size={17} style={{ color }} />}
           </div>
-          <p className="text-xs text-zinc-500 mt-0.5">{dateStr} · {session.duration} min</p>
-        </div>
-        {expanded ? <ChevronUp size={14} className="text-zinc-600" /> : <ChevronDown size={14} className="text-zinc-600" />}
-      </button>
-
-      {expanded && (
-        <div className="px-3.5 pb-3.5 border-t border-white/[0.05] pt-3 space-y-2">
-          {isCardio && session.cardioLog && (
-            <div className="grid grid-cols-2 gap-2">
-              {session.cardioLog.distanceKm && <MiniStat label="Distance" value={`${session.cardioLog.distanceKm} km`} />}
-              {session.cardioLog.avgPaceMinPerKm && <MiniStat label="Allure" value={`${session.cardioLog.avgPaceMinPerKm} min/km`} />}
-              {session.cardioLog.avgHeartRate && <MiniStat label="FC moy." value={`${session.cardioLog.avgHeartRate} bpm`} icon={<Heart size={11} className="text-red-400" />} />}
-              {session.cardioLog.route && <MiniStat label="Parcours" value={session.cardioLog.route} icon={<MapPin size={11} className="text-emerald-400" />} />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <span style={{ background: color + "22", color, border: `1px solid ${color}40`, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999, letterSpacing: "0.08em" }}>
+                {label.toUpperCase()}
+              </span>
+              {volume > 0 && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,238,232,0.35)" }}>{(volume / 1000).toFixed(1)}t</span>}
+              {session.cardioLog?.distanceKm && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,238,232,0.35)" }}>{session.cardioLog.distanceKm} km</span>}
             </div>
-          )}
-          {!isCardio && session.exercises.map((ex) => {
-            const exVol = ex.sets.reduce((s, set) => s + set.reps * set.weightKg, 0);
-            return (
-              <div key={ex.id} className="bg-[#111] rounded-xl p-3">
-                <div className="flex justify-between items-start mb-2">
-                  <p className="text-sm font-semibold text-white">{ex.exerciseName}</p>
-                  <span className="text-[10px] text-zinc-500">{exVol > 0 ? `${exVol} kg vol.` : ""}</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {ex.sets.map((set, i) => (
-                    <span key={i} className="text-xs bg-[#6495ED]/10 text-[#9bb9f3] px-2 py-1 rounded-lg">
-                      {set.reps}×{set.weightKg}kg
-                    </span>
-                  ))}
-                </div>
+            <p style={{ fontSize: 11, color: "rgba(240,238,232,0.35)" }}>{dateStr} · {session.duration} min</p>
+          </div>
+          <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ type: "spring", stiffness: 400, damping: 30 }}>
+            <ChevronDown size={15} style={{ color: "rgba(240,238,232,0.3)" }} />
+          </motion.div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} style={{ overflow: "hidden" }}>
+              <div style={{ padding: "0 16px 16px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 12 }}>
+                {isCardio && session.cardioLog && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {session.cardioLog.distanceKm && <MiniStat label="Distance" value={`${session.cardioLog.distanceKm} km`} />}
+                    {session.cardioLog.avgPaceMinPerKm && <MiniStat label="Allure" value={`${session.cardioLog.avgPaceMinPerKm} min/km`} />}
+                    {session.cardioLog.avgHeartRate && <MiniStat label="FC moy." value={`${session.cardioLog.avgHeartRate} bpm`} icon={<Heart size={10} style={{ color: DANGER }} />} />}
+                    {session.cardioLog.route && <MiniStat label="Parcours" value={session.cardioLog.route} icon={<MapPin size={10} style={{ color: SUCCESS }} />} />}
+                  </div>
+                )}
+                {!isCardio && session.exercises.map((ex) => {
+                  const exVol = ex.sets.reduce((s, set) => s + set.reps * set.weightKg, 0);
+                  return (
+                    <div key={ex.id} style={{ background: "var(--surface-3)", borderRadius: 12, padding: 12, marginBottom: 8 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{ex.exerciseName}</p>
+                        {exVol > 0 && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,238,232,0.3)" }}>{exVol} kg vol.</span>}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {ex.sets.map((set, i) => (
+                          <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, background: `${ACCENT}12`, color: ACCENT, padding: "4px 8px", borderRadius: 8 }}>
+                            {set.reps}×{set.weightKg}kg
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </Card3D>
   );
 }
 
 function MiniStat({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="bg-[#111] rounded-xl p-2.5">
-      <div className="flex items-center gap-1 mb-0.5">{icon}<span className="text-[9px] text-zinc-500 uppercase">{label}</span></div>
-      <span className="text-xs font-semibold text-white">{value}</span>
+    <div style={{ background: "var(--surface-3)", borderRadius: 10, padding: "8px 10px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
+        {icon}<span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(240,238,232,0.25)", textTransform: "uppercase" }}>{label}</span>
+      </div>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{value}</span>
     </div>
   );
 }
